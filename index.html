@@ -1,0 +1,62 @@
+<!-- 
+http://codeincomplete.com/posts/collision-detection-in-breakout/
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Breakout test</title>
+
+    <meta name="viewport" content="width=device-with, initial-scale=1">
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <script src="scripts/breakout.js"></script>
+     <link rel="stylesheet" type="text/css" href="style/style.css">
+
+
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <h1>NYCDA Breakout</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-10 text-center">
+          <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+        <div class="col-md-2 score-wrapper">
+
+          <div class="row score-level">
+
+          <h2>Level</h2>
+          <p>1</p>
+
+        </div>
+
+          <div class="row score-score">
+
+          <h2>Score</h2>
+          <p>0</p>
+
+        </div>
+
+        </div>
+
+
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          Debug data: <input type="checkbox" id="debug">
+          <br>Bat pos-x: <span id="data-bat-x">x</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Bat pos-y: <span id="data-bat-y">y</span>
+          <br>Ball pos-x: <span id="data-ball-x">x</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Ball pos-y: <span id="data-ball-y">y</span>
+          <br>Key pressed: <span id="key">[key]</span>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
