@@ -1,19 +1,20 @@
 //TODO
 
-//Create bat                  done   .
-//Move bat using keyboard     done   .
-//Create ball                 done   .
-//Move ball                   done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
-//Let ball bounch             done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
-//Create collision on wall    done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
-//Make use of object          done
-//Create collision on bat     open
-//Create blocks               open
-//Remove blocks               open
-//Create collision on blocks  open
-//Create score                open
-//Create menu                 open
-//Create levels               open
+//Create bat                    done   .
+//Move bat using keyboard       done   http://nokarma.org/2011/02/27/javascript-game-development-keyboard-input/ (works great!)
+//Create ball                   done   .
+//Move ball                     done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
+//Let ball bounch               done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
+//Create collision on wall      done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
+//Make use of object            done
+//Create collision on bat       open
+//Re-use bat-object for blocks  open
+//Create blocks                 open
+//Remove blocks                 open
+//Create collision on blocks    open
+//Create score                  open
+//Create menu                   open
+//Create levels                 open
 
 
 // http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-with-javascript-jquery
@@ -71,7 +72,6 @@ $( document ).ready(function() {
     $('#data-bat-y').text(bat.y);
     $('#data-ball-x').text(ballX);
     $('#data-ball-y').text(ballY);
-    $('#key').text(key);
   }
 
   function init() {
@@ -83,10 +83,6 @@ $( document ).ready(function() {
       console.log('ERROR: Unable to create bat object');
     }
     bat.init((canvas.width/2) - (batW/2), 550, batW, 5, 'black', 'white');
-
-    console.log(bat.x);
-    console.log(bat.y);
-
 
     ball = new objectBall();
     if (!ball) {
