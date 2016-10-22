@@ -46,9 +46,9 @@ $( document ).ready(function() {
   var dy          = -2;
 
   var batW        = 100;                          //Width of the bat
-  var batY        = 550;                          //Pos Y of the bat. Always 550px in this case;
-  var batX        = (canvas.width/2) - (batW/2);  //Pos X of the bat, starting point. Center of the canvas
-  var batS        = 5;                            //Speed of the bat movement
+//  var batY        = 550;                          //Pos Y of the bat. Always 550px in this case;
+//  var batX        = (canvas.width/2) - (batW/2);  //Pos X of the bat, starting point. Center of the canvas
+//  var batS        = 5;                            //Speed of the bat movement
 
   var bat         = null;
   var ball        = null;
@@ -67,8 +67,8 @@ $( document ).ready(function() {
   //Functions we can use
   //Draw some debug information
   function drawDebug() {
-    $('#data-bat-x').text(batX);
-    $('#data-bat-y').text(batY);
+    $('#data-bat-x').text(bat.x);
+    $('#data-bat-y').text(bat.y);
     $('#data-ball-x').text(ballX);
     $('#data-ball-y').text(ballY);
     $('#key').text(key);
@@ -82,7 +82,11 @@ $( document ).ready(function() {
     if (!bat) {
       console.log('ERROR: Unable to create bat object');
     }
-    bat.init(batX, batY, batW, batS, 'black', 'white');
+    bat.init((canvas.width/2) - (batW/2), 550, batW, 5, 'black', 'white');
+
+    console.log(bat.x);
+    console.log(bat.y);
+
 
     ball = new objectBall();
     if (!ball) {
@@ -98,7 +102,7 @@ $( document ).ready(function() {
   function run() {
     collision();
 
-    bat.changePosition(batX, batY);
+    bat.changePosition(bat.x, bat.y);
     ball.changePosition(ballX, ballY);
 
     getInput();
@@ -125,18 +129,18 @@ $( document ).ready(function() {
     window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
     window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 
-    if (Key.isDown(Key.UP))    batS = bat.changeSpeed(1.1);  //this.moveUp();
-    if (Key.isDown(Key.LEFT))  bat.changePosition(bat.batX - bat.batS, bat.batY);   //this.moveLeft();
-    if (Key.isDown(Key.DOWN))  bat.changeWidth(200);                                //this.moveDown();
-    if (Key.isDown(Key.RIGHT)) bat.changePosition(bat.batX + bat.batS, bat.batY);   //this.moveRight();
+    if (Key.isDown(Key.UP))    bat.changeSpeed(1.1);  //this.moveUp();
+    if (Key.isDown(Key.LEFT))  bat.x = bat.x - bat.s; //this.moveLeft();
+    if (Key.isDown(Key.DOWN))  bat.changeWidth(200);  //this.moveDown();
+    if (Key.isDown(Key.RIGHT)) bat.x = bat.x + bat.s; //this.moveRight();
   }
 
 
   function collision() {
 
     //Make sure the bat is not going out of the canvas
-    if (batX < 0)                     batX = 0;
-    if (batX > (canvas.width-bat.w))  batX = (canvas.width-bat.w);
+    if (bat.x < 0)                     bat.x = 0;
+    if (bat.x > (canvas.width-bat.w))  bat.x = (canvas.width-bat.w);
 
     //Doe stuiter-shit met the ball
     if(ballX + dx > canvas.width-ballRadius || ballX + dx < ballRadius) {
