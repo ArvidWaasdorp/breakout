@@ -1,5 +1,5 @@
 //TODO
-
+//==================================
 //Create bat                    done   .
 //Move bat using keyboard       done   http://nokarma.org/2011/02/27/javascript-game-development-keyboard-input/ (works great!)
 //Create ball                   done   .
@@ -7,7 +7,8 @@
 //Let ball bounch               done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
 //Create collision on wall      done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
 //Make use of object            done
-//Create collision on bat       open
+//Create collision on bat       done
+
 //Re-use bat-object for blocks  open
 //Create blocks                 open
 //Remove blocks                 open
@@ -15,6 +16,11 @@
 //Create score                  open
 //Create menu                   open
 //Create levels                 open
+//Change angle > hit on site    open
+//Change speed of ball          open
+//Add power-ups                 open
+//Launch game on [space]        open
+//Add lives                     open
 
 
 // http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-with-javascript-jquery
@@ -41,15 +47,14 @@ $( document ).ready(function() {
   var ctx     = canvas.getContext('2d');
 
   var ballRadius  = 10;
-  var ballX       = canvas.width/2;
-  var ballY       = canvas.height-60;
+//  var ballX       = canvas.width/2;
+//  var ballY       = canvas.height-60;
   var dx          = 2;
   var dy          = -2;
 
-  var batW        = 100;                          //Width of the bat
-//  var batY        = 550;                          //Pos Y of the bat. Always 550px in this case;
-//  var batX        = (canvas.width/2) - (batW/2);  //Pos X of the bat, starting point. Center of the canvas
-//  var batS        = 5;                            //Speed of the bat movement
+  //Moet beter
+  var lives       = 3;
+  var gameSpeed   = 1;
 
   var bat         = null;
   var ball        = null;
@@ -60,7 +65,6 @@ $( document ).ready(function() {
   //Run the game
   console.log('Running game');
 
-
   //The game loop
   setInterval(run, 10);
 
@@ -70,8 +74,8 @@ $( document ).ready(function() {
   function drawDebug() {
     $('#data-bat-x').text(bat.x);
     $('#data-bat-y').text(bat.y);
-    $('#data-ball-x').text(ballX);
-    $('#data-ball-y').text(ballY);
+    $('#data-ball-x').text(ball.x);
+    $('#data-ball-y').text(ball.y);
   }
 
   function init() {
@@ -82,28 +86,29 @@ $( document ).ready(function() {
     if (!bat) {
       console.log('ERROR: Unable to create bat object');
     }
-    bat.init((canvas.width/2) - (batW/2), 550, batW, 5, 'black', 'white');
+    bat.init((canvas.width/2) - (100/2), 550, 100, 10, 5, 'black', 'blue');
 
     ball = new objectBall();
     if (!ball) {
       console.log('ERROR: Unable to create ball object');
     }
-    ball.init(ballX, ballY, ballRadius, '#0095DD', dx, dy);
+    ball.init(canvas.width/2, canvas.height-60, 10, '#0095DD', 2, -2);
     ball.changeXSpeed(dx);
     ball.changeYSpeed(dy);
+
+    //Set some interface value
+    $('#lives').text(lives);
    
   }
 
-
   function run() {
-    collision();
-
-    bat.changePosition(bat.x, bat.y);
-    ball.changePosition(ballX, ballY);
 
     getInput();
 
+    getCollision();
+
     draw();
+
   }
 
   function draw() {
@@ -129,29 +134,85 @@ $( document ).ready(function() {
     if (Key.isDown(Key.LEFT))  bat.x = bat.x - bat.s; //this.moveLeft();
     if (Key.isDown(Key.DOWN))  bat.changeWidth(200);  //this.moveDown();
     if (Key.isDown(Key.RIGHT)) bat.x = bat.x + bat.s; //this.moveRight();
+
+    //code to increase gameSpeed
+    //Input here :D
+    if (Key.isDown(Key.A))       {  gameSpeed = gameSpeed + 0.1;   console.log('A : '   + gameSpeed);   }
+    if (Key.isDown(Key.Z))       {  gameSpeed = gameSpeed - 0.1;   console.log('Z : '   + gameSpeed);   }
+    if (Key.isDown(Key.ESCAPE))  {  gameSpeed = gameSpeed - 0.1;   console.log('ESC : ' + gameSpeed);   }
+
   }
 
 
-  function collision() {
+  function getCollision() {
 
     //Make sure the bat is not going out of the canvas
     if (bat.x < 0)                     bat.x = 0;
     if (bat.x > (canvas.width-bat.w))  bat.x = (canvas.width-bat.w);
 
     //Doe stuiter-shit met the ball
-    if(ballX + dx > canvas.width-ballRadius || ballX + dx < ballRadius) {
+    if(ball.x + dx > canvas.width-ballRadius || ball.x + dx < ballRadius) {
         dx = -dx;
     }
-    if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
+
+    if(ball.y + dy > canvas.height-ballRadius || ball.y + dy < ballRadius) {
         dy = -dy;
+
+        if (dy < 0) {
+          lives--;
+          //Draw interface bouwen
+          $('#lives').text(lives);
+        }
     }
 
-    // if (distance < circle1.radius + circle2.radius) {
-    // // collision detected!
-    // }
+
     
-    ballX += dx;
-    ballY += dy;
+
+
+    //Collision algemeen
+
+
+    $('#data-debug_1').text('dx: ' + dx + ' | dy: ' + dy);
+
+
+    if (((ball.x+ball.r/2 > bat.x) && (ball.x-ball.r/2 < bat.x+bat.w)) && ((ball.y+ball.r/2 >= bat.y) && (ball.y-ball.r/2 <= bat.y+bat.h))) {
+
+      if ((ball.x > bat.x) && (ball.x < (bat.x+bat.w)) && ((ball.y > bat.y) && (ball.y < bat.y+bat.h))) {
+        console.log ('Side');
+           dx = -dx;
+           dy = +dy;
+           ball.changePosition(ball.x + dx, ball.y + dy);
+      }
+
+      if ((ball.x > bat.x) && (ball.x < (bat.x+bat.w)))  {
+        if (ball.y <= bat.y) {
+           console.log ('Top');
+           dx = +dx;
+           dy = -dy;
+           ball.changePosition(ball.x + dx, ball.y + dy);
+        } 
+         if ((ball.x <= bat.x+bat.w) && (ball.y >= bat.y+bat.h)) {
+           console.log ('Bottom');
+           dx = +dx;
+           dy = -dy;
+           ball.changePosition(ball.x + dx, ball.y + dy);
+        }
+      }
+
+
+    }
+
+    //Speed aanpassen
+    //Speed aanpassen
+    //Speed aanpassen
+//    ballX += dx;
+//    ballY += dy;
+
+    ball.changePosition(ball.x + dx, ball.y + dy);
+
+    //Speed aanpassen
+    //Speed aanpassen
+    //Speed aanpassen
 
   }
 
@@ -206,26 +267,23 @@ $( document ).ready(function() {
   };
 
   //Object Bat
-  function objectBat(x, y, w, s, borderColor, fillColor){
+  function objectBat(x, y, w, h, s, borderColor, fillColor){
     this.x = x;
     this.y = y;
     this.w = w;
+    this.h = h;
     this.s = s;
     this.border = borderColor;
     this.fill = fillColor;
 
-    objectBat.prototype.init = function(x, y, w, s, borderColor, fillColor) {
+    objectBat.prototype.init = function(x, y, w, h, s, borderColor, fillColor) {
       this.x = x;
       this.y = y;
       this.w = w;
+      this.h = h;
       this.s = s;
       this.border = borderColor;
       this.fill = fillColor;
-    };
-
-    objectBat.prototype.changePosition = function(x, y) {
-      this.x = x;
-      this.y = y;
     };
 
     objectBat.prototype.changeWidth = function(w) {
@@ -239,12 +297,11 @@ $( document ).ready(function() {
 
     objectBat.prototype.changeSpeed = function(multiplierS) {
       this.s = this.s*multiplierS;
-      return this.s;
     };
 
     objectBat.prototype.draw = function() {
       ctx.beginPath();
-      ctx.rect(this.x, this.y, this.w, 20);
+      ctx.rect(this.x, this.y, this.w, this.h);
       ctx.fillStyle = this.fill;
       ctx.fill();
       ctx.lineWidth = 2;
@@ -262,6 +319,10 @@ $( document ).ready(function() {
     UP:     38,
     RIGHT:  39,
     DOWN:   40,
+    A:      65,
+    Z:      90,
+    ESCAPE: 27,
+    SPACE:  13,
     
     isDown: function(keyCode) {
       return this._pressed[keyCode];

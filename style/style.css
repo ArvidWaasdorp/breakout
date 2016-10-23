@@ -37,7 +37,7 @@ h1 {
   margin-bottom: 10px;
 }
 
-.score-level, .score-score {
+.score-level, .score-score, .score-lives {
   margin-left: 10px;
   margin-right: 10px;
   /*margin-bottom: 10px;*/
