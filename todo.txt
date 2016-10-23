@@ -1,0 +1,32 @@
+TODO
+==================================
+Create bat                    done   
+Move bat using keyboard       done   http://nokarma.org/2011/02/27/javascript-game-development-keyboard-input/ (works great!)
+Create ball                   done   
+Move ball                     done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
+Let ball bounch               done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
+Create collision on wall      done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
+Make use of object            done
+Create collision on bat       done   Not briljant, but it works
+Re-use bat-object for blocks  open   ? Does I want this? Works oke now
+Create blocks                 done
+Remove blocks                 done
+Create collision on blocks    done   Not briljant, but it works !!!Note see bugs!!!  
+Create score                  open   Simple implementation
+Create menu                   open
+Create levels                 open   Must load correctly
+Change angle > hit on site    done
+Change speed of ball          open   ? Do I want this?
+Add power-ups                 open
+Launch game on [space]        done   Simple implementation, see B2
+Add lives                     open   Simple implementation, game stops nothing happends
+
+Usefull links:
+http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-with-javascript-jquery
+https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
+
+Help for collision detection 
+? https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+
+B1) BUG dat bal door de blokken gaat. Gebeurt nu vooral wanneer de bal van rechts boven naar links gaat!!!! 
+B2) Space hangs :(, difficult to pauze and start the game again
