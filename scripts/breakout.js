@@ -105,8 +105,12 @@ $( document ).ready(function() {
     ball.changeXSpeed(dx);
     ball.changeYSpeed(dy);
 
+    loadLevel();
 
-    var strLevel   = levels[level][1]; 
+  }
+
+  function loadLevel() {
+    var strLevel   = levels[game.level][1]; 
     var arrayLevel = 0;
 
     for (i=0; i<strLevel.length; i++) {
@@ -191,7 +195,7 @@ $( document ).ready(function() {
       }
     }
 
-    if (Key.isDown(Key.ESCAPE))  {  gameSpeed = gameSpeed - 0.1;   console.log('ESC : ' + gameSpeed);   }
+    //if (Key.isDown(Key.ESCAPE))  {  gameSpeed = gameSpeed - 0.1;   console.log('ESC : ' + gameSpeed);   }
   }
 
 
@@ -299,6 +303,15 @@ $( document ).ready(function() {
 
     if (game.blocksLeft === 0) {
       game.state = 'won';
+
+
+
+      //function reset game
+      //call load level again
+      //reset state, keep score 
+      //level+1
+
+
     }
   }
 
@@ -317,6 +330,10 @@ $( document ).ready(function() {
 
     gameSettings.prototype.changeBlocksLeft = function(blocksLeft) {
       this.blocksLeft = blocksLeft;
+    }
+
+    gameSettings.prototype.changeLevel = function(level) {
+      this.level = level;
     }
 
     gameSettings.prototype.init = function(state, level, score, lives, blocks, blocksLeft) {
