@@ -16,8 +16,15 @@ h1 {
 
 #gameCanvas {
   margin-top: 5px; 
-  border: 1px solid #000;
-  border-radius: 5px;
+
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+
+
+
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .score-wrapper {
@@ -49,12 +56,13 @@ h1 {
 }
 
 .col-md-10 {
-  border: 1px solid #000;
+  /*border: 1px solid #000;*/
 }
 
 .col-md-12 {
   /*border: 1px solid #000;*/
 }
+
 
 
 /*

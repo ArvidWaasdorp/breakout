@@ -182,7 +182,7 @@ $( document ).ready(function() {
         dy = -dy;
 
         if (dy < 0) {
-          lives--;
+          game.lives--;
 
           //Resetting ball and bat
           game.state = 'restart';
