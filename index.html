@@ -8,11 +8,12 @@ http://codeincomplete.com/posts/collision-detection-in-breakout/
 
     <meta name="viewport" content="width=device-with, initial-scale=1">
 
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-    <script src="scripts/breakout.js"></script>
     <link rel="stylesheet" type="text/css" href="style/style.css">
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="scripts/breakout.js"></script>
 
   </head>
   <body>
@@ -43,7 +44,7 @@ http://codeincomplete.com/posts/collision-detection-in-breakout/
           </div>
         </div>
       </div>
-      <div class="row">
+      <!--<div class="row">
         <div class="col-md-12">
           Debug data: <input type="checkbox" id="debug" checked>
           <br>Bat pos-x: <span id="data-bat-x">x</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Bat pos-y: <span id="data-bat-y">y</span>
@@ -51,8 +52,30 @@ http://codeincomplete.com/posts/collision-detection-in-breakout/
           <br><span id="data-debug_1">Debug-1</span>
           <br><span id="data-debug_2">Debug-2</span>
         </div>
+      </div>-->
+    </div>
+
+
+  <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Large Modal</button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body">
+          <p>This is a large modal.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
+  </div>
+
 
   </body>
 </html>

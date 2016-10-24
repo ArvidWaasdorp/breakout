@@ -17,14 +17,18 @@ h1 {
 #gameCanvas {
   margin-top: 5px; 
 
-  border-top: 1px solid #000;
-  border-left: 1px solid #000;
-  border-right: 1px solid #000;
-
-
+  border-top: 1px solid #25545b;
+  border-left: 1px solid #25545b;
+  border-right: 1px solid #25545b;
 
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+
+  background: #f8f9e9; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(#75a8ae, #FFF); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#75a8ae,  #FFF); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#75a8ae, #FFF); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#75a8ae, #FFF); /* Standard syntax */
 }
 
 .score-wrapper {
@@ -38,13 +42,16 @@ h1 {
 }
 
 .score-wrapper p {
-  border: 1px solid #000;
+  border: 1px solid #25545b;
+  background: #e2fcff;
   margin: 0;
   padding: 0;
   margin-bottom: 10px;
 }
 
 .score-level, .score-score, .score-lives {
+  font-family: Moonhouse;
+  font-size: 22px;
   margin-left: 10px;
   margin-right: 10px;
   /*margin-bottom: 10px;*/
@@ -52,7 +59,8 @@ h1 {
 }
 
 .col-md-2 {
-  border: 1px solid #000;
+  border: 1px solid #25545b;
+  background: #75a8ae;
 }
 
 .col-md-10 {

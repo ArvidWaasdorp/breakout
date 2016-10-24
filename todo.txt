@@ -24,9 +24,15 @@ Add lives                     open   Simple implementation, game stops nothing h
 Usefull links:
 http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-with-javascript-jquery
 https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
+! https://github.com/jakesgordon/javascript-breakout
 
 Help for collision detection 
 ? https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+
+Improve speed
+https://www.google.nl/search?q=this.pressed+slows+browser&oq=this.pressed+slows+browser&aqs=chrome..69i57.5912j0j4&sourceid=chrome&ie=UTF-8#q=canvas+draw+performance
+https://developer.mozilla.org/nl/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
+
 
 B1) BUG dat bal door de blokken gaat. Gebeurt nu vooral wanneer de bal van rechts boven naar links gaat!!!! 
 B2) Space hangs :(, difficult to pauze and start the game again

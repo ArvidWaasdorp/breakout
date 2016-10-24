@@ -1,8 +1,62 @@
+//Setting the default values for the game
+var Defaults = {
+
+  fps  : 60,
+  stats: false,
+
+  game: {
+    state     : 'start',
+    level     : 1,
+    score     : 0,
+    lives     : 3,
+    blocks    : 0,
+    blocksLeft: 0,
+  },
+
+  ball: {
+    x    : 400,
+    y    : 550,
+    r    : 10,
+    color: '#0095DD',
+    dx        : 2,
+    dxMax     : 6,
+    dy        : -3,
+  },
+
+  bat: {
+    x          : 350,
+    y          : 560,
+    w          : 100,
+    h          : 10,
+    s          : 5,
+    borderColor: 'black',
+    fillColor  : 'blue',
+  },
+
+  blocks: {
+    startBlockX : 0,
+    startBlockY : 50,
+    blockLength : 80,
+    blockHeight : 20,
+    blockSpacing: 5,
+  },
+
+  state: {
+    initial: 'menu',
+    events: [
+      { name: 'play',    from: 'menu', to: 'game' },
+      { name: 'abandon', from: 'game', to: 'menu' },
+      { name: 'lose',    from: 'game', to: 'menu' }
+  ]}
+};
+
 
 $( document ).ready(function() {
 
-  var canvas  = document.getElementById('gameCanvas');
-  var ctx     = canvas.getContext('2d');
+  var canvas    = document.getElementById('gameCanvas');
+  var canvasUI  = document.getElementById('gameCanvas-ui');
+  var ctx       = canvas.getContext('2d');
+  var ctxUI     = canvas.getContext('2d');
 
   var levels       = [
                        ['0','0 is not a level'],
@@ -11,17 +65,16 @@ $( document ).ready(function() {
                        ['3', '10101010-00111100'],
                        ['4', '00111100-11111111'],
                      ];
-  var level        = 1;
-  var startBlockX  = 0;
-  var startBlockY  = 50;
-  var blockLength  = 80; //default
-  var blockHeight  = 20; //default
-  var blockSpacing = 5;
-  var gameScore    = 0;
 
-  var dx           = 2;
-  var dxMax        = 6;
-  var dy           = -3;
+  // var startBlockX  = 0;
+  // var startBlockY  = 50;
+  // var blockLength  = 80; //default
+  // var blockHeight  = 20; //default
+  // var blockSpacing = 5;
+
+  // var dx           = 2;
+  // var dxMax        = 6;
+  // var dy           = -3;
 
   //De objecten
   var game         = null;
@@ -62,16 +115,16 @@ $( document ).ready(function() {
 
     //New game object
     game = new gameSettings();
-    game.init('start', level, gameScore, 3, 0, 0);
+    game.init('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft);
 
     //New bat object
     bat = new objectBat();
-    bat.init((canvas.width/2) - (100/2), 560, 100, 10, 5, 'black', 'blue');
+    bat.init(Defaults.bat.x, Defaults.bat.y, Defaults.bat.w, Defaults.bat.h, Defaults.bat.s, Defaults.bat.borderColor, Defaults.bat.fillColor);
 
     ball = new objectBall();
-    ball.init(canvas.width/2, canvas.height-50, 10, '#0095DD', 2, -2);
-    ball.changeXSpeed(dx);
-    ball.changeYSpeed(dy);
+    ball.init(Defaults.ball.x, Defaults.ball.y, Defaults.ball.r, Defaults.ball.color, Defaults.ball.dx, Defaults.ball.dxMax, Defaults.ball.dy);
+    ball.changeXSpeed(Defaults.ball.dx);
+    ball.changeYSpeed(Defaults.ball.dy);
 
     loadLevel();
 
@@ -85,21 +138,21 @@ $( document ).ready(function() {
 
       if (strLevel[i] === '1') {
         block[arrayLevel] = new objectBlock();
-        block[arrayLevel].init(startBlockX, startBlockY, blockLength, blockHeight, 'red', 'gray', 'alive');
+        block[arrayLevel].init(Defaults.blocks.startBlockX, Defaults.blocks.startBlockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, 'red', 'gray', 'alive');
 
         //console.log (arrayLevel + ' x: ', block[arrayLevel].x + ' y: ' + block[arrayLevel].y);
 
-        startBlockX = startBlockX + blockLength;
+        Defaults.blocks.startBlockX = Defaults.blocks.startBlockX + Defaults.blocks.blockLength;
         arrayLevel++;
       }
 
       if (strLevel[i] === '0') {
-        startBlockX = startBlockX + blockLength;
+        Defaults.blocks.startBlockX = Defaults.blocks.startBlockX + Defaults.blocks.blockLength;
       }
 
       if (strLevel[i] === '-') {
-        startBlockX = 0;
-        startBlockY = startBlockY + blockHeight + blockSpacing;
+        Defaults.blocks.startBlockX = 0;
+        Defaults.blocks.startBlockY = Defaults.blocks.startBlockY + Defaults.blocks.blockHeight + Defaults.blocks.blockSpacing;
       }
     }
 
@@ -109,14 +162,26 @@ $( document ).ready(function() {
 
   function run() {
 
+    getInput();
+
     if (game.state === 'run') {
+
+      countDown();
+
+
       getCollision();
     }
 
-    getInput();
     draw();
 
   }
+
+
+  function countDown() {
+ctx.font = "20px Georgia";
+ctx.fillText("Hello World!", 400, 300);
+  }
+
 
   function draw() {
 
@@ -156,14 +221,17 @@ $( document ).ready(function() {
     //Input here :D
     if (Key.isDown(Key.SPACE))   {
       switch (game.state) {
-        case 'start':    game.state = 'run';   break;
-        case 'run':      game.state = 'pauze'; break;
-        case 'pauze':    game.state = 'run';   break;
+        case 'play':     game.state = 'run';   break;
         case 'restart':  game.state = 'run';   break;
       }
     }
 
-    //if (Key.isDown(Key.ESCAPE))  {  gameSpeed = gameSpeed - 0.1;   console.log('ESC : ' + gameSpeed);   }
+    if (Key.isDown(Key.P))   {
+      switch (game.state) {
+        case 'run':     game.state = 'pauze'; break;
+        case 'pauze':   game.state = 'run';   break;
+      }
+    }
   }
 
 
@@ -174,26 +242,26 @@ $( document ).ready(function() {
     if (bat.x > (canvas.width-bat.w))  bat.x = (canvas.width-bat.w);
 
     //Doe stuiter-shit met the ball
-    if(ball.x + dx > canvas.width-ball.r || ball.x + dx < ball.r) {
-        dx = -dx;
+    if(ball.x + ball.dx > canvas.width-ball.r || ball.x + ball.dx < ball.r) {
+        ball.dx = -ball.dx;
     }
 
-    if(ball.y + dy > canvas.height-ball.r || ball.y + dy < ball.r) {
-        dy = -dy;
+    if(ball.y + ball.dy > canvas.height-ball.r || ball.y + ball.dy < ball.r) {
+        ball.dy = -ball.dy;
 
-        if (dy < 0) {
+        if (ball.dy < 0) {
           game.lives--;
 
           //Resetting ball and bat
           game.state = 'restart';
-          ball.changePosition(canvas.width/2, canvas.height-48);
-          dx      = 2;
-          dy      = -3;
-          bat.x   = (canvas.width/2) - (100/2)
-          bat.y   = 560;
-          bat.w   = 100;
+          ball.changePosition(Defaults.ball.x, Defaults.ball.y);
+          ball.dx = Defaults.ball.dx;
+          ball.dy = Defaults.ball.dy;
+          bat.x   = Defaults.bat.x;
+          bat.y   = Defaults.bat.y;
+          bat.w   = Defaults.bat.w;
 
-          if (lives === 0) {
+          if (game.lives === 0) {
             game.state = 'gameover';
           }
         }
@@ -205,8 +273,8 @@ $( document ).ready(function() {
 
       if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)) && ((ball.y >= bat.y) && (ball.y <= bat.y+bat.h))) {
         //console.log ('Side');
-        dx = -dx;
-        dy = +dy;
+        ball.dx = -ball.dx;
+        ball.dy = +ball.dy;
       }
 
       if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)))  {
@@ -216,21 +284,21 @@ $( document ).ready(function() {
           //Callculate the new angle of the ball. End of the bat is max y, mid of the bat min y 
           if (posBallBat > (bat.w/2)) {
             var newX = (bat.w/2) - posBallBat;
-            dx = dxMax * (newX / -(bat.w/2));
+            ball.dx = ball.dxMax * (newX / -(bat.w/2));
           } else {
 
             var newX = (bat.w/2) - posBallBat;
-            dx = dxMax * (newX / -(bat.w/2));
+            ball.dx = ball.dxMax * (newX / -(bat.w/2));
           }
 
-            dx = +dx;
-            dy = -dy;
+            ball.dx = +ball.dx;
+            ball.dy = -ball.dy;
         } 
 
         if ((ball.x <= bat.x+bat.w) && (ball.y >= bat.y+bat.h)) {
           //console.log ('Bottom');
-          dx = +dx;
-          dy = -dy;
+          ball.dx = +ball.dx;
+          ball.dy = -ball.dy;
         }
       }
 
@@ -243,20 +311,20 @@ $( document ).ready(function() {
 
         if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
           //console.log ('Side');
-          dx = -dx;
-          dy = +dy;
+          ball.dx = -ball.dx;
+          ball.dy = +ball.dy;
         }
 
         if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)))  {
           if (ball.y <= block[i].y) {
             //console.log ('Top');
-            dx = +dx;
-            dy = -dy;
+            ball.dx = +ball.dx;
+            ball.dy = -ball.dy;
           } 
           if ((ball.x <= block[i].x+block[i].w) && (ball.y >= block[i].y+block[i].h)) {
             //console.log ('Bottom');
-            dx = +dx;
-            dy = -dy;
+            ball.dx = +ball.dx;
+            ball.dy = -ball.dy;
           }
         }
         block[i].status = 'dead';
@@ -266,25 +334,22 @@ $( document ).ready(function() {
     }
 
     if (game.state != 'pauze') {
-      ball.changePosition(ball.x + dx, ball.y + dy);
+      ball.changePosition(ball.x + ball.dx, ball.y + ball.dy);
     }
 
     if (game.blocksLeft === 0) {
       game.state = 'won';
-
-
 
       //function reset game
       //call load level again
       //reset state, keep score 
       //level+1
 
-
     }
   }
 
-
   function gameSettings(state, level, score, lives, blocks, blocksLeft) {
+
     this.state      = state;
     this.level      = level;
     this.score      = score;
@@ -312,25 +377,27 @@ $( document ).ready(function() {
       this.blocks    = blocks;
       this.blocksLeft = blocksLeft; 
     };
-
   } 
 
   //Object Ball
-  function objectBall(x, y, r, color, sX, sY){
+  function objectBall(x, y, r, color, dx, dxMax, dy){
+
     this.x = x;
     this.y = y;
     this.r = r;
     this.color = color
-    this.sX = sX;
-    this.sY = sY;
+    this.dx = dx;
+    this.dxMax = dxMax;
+    this.dy = dy;
 
-    objectBall.prototype.init = function(x, y, r, color, sX, sY) {
+    objectBall.prototype.init = function(x, y, r, color, dx, dxMax, dy) {
       this.x = x;
       this.y = y;
       this.r = r;
       this.color = color;
-      this.sX = sX;
-      this.sY = sY;
+      this.dx = dx;
+      this.dxMax = dxMax;
+      this.dy = dy;
     };
 
     objectBall.prototype.changePosition = function(x, y) {
@@ -346,12 +413,12 @@ $( document ).ready(function() {
       this.color = color;
     };
 
-    objectBall.prototype.changeXSpeed = function(sX) {
-      this.sX = sX;
+    objectBall.prototype.changeXSpeed = function(dx) {
+      this.dx = dx;
     };
 
-    objectBall.prototype.changeYSpeed = function(sY) {
-      this.sY = sY;
+    objectBall.prototype.changeYSpeed = function(dy) {
+      this.dy = dy;
     };
 
     objectBall.prototype.draw = function() {
@@ -362,11 +429,11 @@ $( document ).ready(function() {
       ctx.closePath();
     };
 
-
   };
 
   //Object Bat
-  function objectBat(x, y, w, h, s, borderColor, fillColor){
+  function objectBat(x, y, w, h, s, borderColor, fillColor) {
+
     this.x = x;
     this.y = y;
     this.w = w;
@@ -446,31 +513,32 @@ $( document ).ready(function() {
    
   };
 
-
   //Create key-object
   var Key = {
     _pressed: {},
 
-    LEFT:   37,
-    UP:     38,
-    RIGHT:  39,
-    DOWN:   40,
-    A:      65,
-    Z:      90,
-    ESCAPE: 27,
-    SPACE:  32,
-    
-    isDown: function(keyCode) {
-      return this._pressed[keyCode];
-    },
-    
-    onKeydown: function(event) {
-      this._pressed[event.keyCode] = true;
-    },
-    
-    onKeyup: function(event) {
-      delete this._pressed[event.keyCode];
-    }
+      LEFT:   37,
+      UP:     38,
+      RIGHT:  39,
+      DOWN:   40,
+      A:      65,
+      Z:      90,
+      ESCAPE: 27,
+      SPACE:  32,
+      P:      80,
+      R:      82,
+      
+      isDown: function(keyCode) {
+        return this._pressed[keyCode];
+      },
+      
+      onKeydown: function(event) {
+        this._pressed[event.keyCode] = true;
+      },
+      
+      onKeyup: function(event) {
+        delete this._pressed[event.keyCode];
+      }
   };
 
 });
