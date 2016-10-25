@@ -12,6 +12,7 @@ h1 {
   font-family: Moonhouse;
   text-transform: uppercase;
   font-size: 50px;
+  margin: 0;
 }
 
 #gameCanvas {
@@ -30,6 +31,10 @@ h1 {
   background: -moz-linear-gradient(#75a8ae, #FFF); /* For Firefox 3.6 to 15 */
   background: linear-gradient(#75a8ae, #FFF); /* Standard syntax */
 }
+
+/*.container {
+  border: 1px solid #000;
+}*/
 
 .score-wrapper {
   border-top-left-radius: 5px;

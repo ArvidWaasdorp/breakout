@@ -26,6 +26,11 @@ http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-wit
 https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
 ! https://github.com/jakesgordon/javascript-breakout
 
+
+fps: 1000.0 / this.fps
+
+
+
 Help for collision detection 
 ? https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 

@@ -1,12 +1,11 @@
 //Setting the default values for the game
 var Defaults = {
 
-  fps  : 60,
-  stats: false,
+    fps  : 60,
 
   game: {
     state     : 'start',
-    level     : 1,
+    level     : 5,
     score     : 0,
     lives     : 3,
     blocks    : 0,
@@ -15,30 +14,30 @@ var Defaults = {
 
   ball: {
     x    : 400,
-    y    : 550,
-    r    : 10,
-    color: '#0095DD',
-    dx        : 2,
-    dxMax     : 6,
-    dy        : -3,
+    y    : 490,
+    r    : 7,
+    color: '#d9534f',
+    dx   : 3,  //2
+    dxMax: 8,  //6
+    dy   : -7, //-3
   },
 
   bat: {
     x          : 350,
-    y          : 560,
+    y          : 500,
     w          : 100,
     h          : 10,
-    s          : 5,
-    borderColor: 'black',
-    fillColor  : 'blue',
+    s          : 10, //5
+    borderColor: '#428bca',
+    fillColor  : '#5bc0de',
   },
 
   blocks: {
     startBlockX : 0,
     startBlockY : 50,
-    blockLength : 80,
+    blockLength : 40,
     blockHeight : 20,
-    blockSpacing: 5,
+    blockSpacing: 0,
   },
 
   state: {
@@ -50,31 +49,66 @@ var Defaults = {
   ]}
 };
 
+var layouts = {
+
+  facebook: {
+    border: '#3b5998',
+    block1: '#8b9dc3',
+    block2: '#dfe3ee',
+    block3: '#f7f7f7',
+    block4: '#ffffff',
+  },
+
+  google: {
+    border: '#d62d20',
+    block1: '#ffa700',
+    block2: '#0057e7',
+    block3: '#008744',
+    block4: '#ffffff',
+  },
+
+  microsoft: {
+    border: '#737373',
+    block1: '#f65314',
+    block2: '#7cbb00',
+    block3: '#00a1f1',
+    block4: '#ffbb00',
+  },
+
+  caucasian: {
+    border: '#ffad60',
+    block1: '#eac086',
+    block2: '#ffcd94',
+    block3: '#ffe39f',
+    block4: '#ffe0bd',
+  },
+
+  pastel: {
+    border: '#5a5255',
+    block1: '#1b85b8',
+    block2: '#ae5a41',
+    block3: '#559e83',
+    block4: '#c3cb71',
+  }
+
+};
+
+
+
 
 $( document ).ready(function() {
 
-  var canvas    = document.getElementById('gameCanvas');
-  var canvasUI  = document.getElementById('gameCanvas-ui');
-  var ctx       = canvas.getContext('2d');
-  var ctxUI     = canvas.getContext('2d');
+  var canvas    = document.getElementById ('gameCanvas');
+  var ctx       = canvas.getContext ('2d');
 
   var levels       = [
-                       ['0','0 is not a level'],
-                       ['1', '101-1100101111-1111111111-0000000000-1100111010-1111111111-1111111111'],
-                       ['2', '00101111-10101'],
-                       ['3', '10101010-00111100'],
-                       ['4', '00111100-11111111'],
+                       ['0', '', '0 is not a level'],
+                       ['1', 'google',     '10100023432341243240-11001123234141441111-11412411341121213111-04124023003203010000-14134130032412311010-11113213120013211111-14132113211340341111'],
+                       ['2', 'microsoft',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+                       ['3', 'facebook',   '10101324231422431010-02313123123410111100-32134123412321341231-31230123031301320414-03123023213030130312-03123013201230123130-04124412421432424212'],
+                       ['4', 'caucasian',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+                       ['5', 'pastel',     '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
                      ];
-
-  // var startBlockX  = 0;
-  // var startBlockY  = 50;
-  // var blockLength  = 80; //default
-  // var blockHeight  = 20; //default
-  // var blockSpacing = 5;
-
-  // var dx           = 2;
-  // var dxMax        = 6;
-  // var dy           = -3;
 
   //De objecten
   var game         = null;
@@ -82,65 +116,88 @@ $( document ).ready(function() {
   var ball         = null;
   var block        = [];
 
+
   //Init the game. Set default values
   init();
 
   //Run the game
-  console.log('Running game');
-  setInterval(run, 10);          //The game loop
+  console.log ('Running game');
+//  setInterval(run, 10);          //The game loop
+
+  setInterval (run, 1000 / Defaults.fps);
 
   //Functions we can use
   //Draw some debug information
-  function drawDebug() {
-    $('#data-bat-x').text(bat.x);
-    $('#data-bat-y').text(bat.y);
-    $('#data-ball-x').text(ball.x);
-    $('#data-ball-y').text(ball.y);
-    $('#data-debug_1').text('State: ' + game.state);
-    $('#data-debug_2').text('Blocks left: ' + game.blocksLeft);
-    
-  }
+  // function drawDebug() {
+  //   $('#data-bat-x').text (bat.x);
+  //   $('#data-bat-y').text (bat.y);
+  //   $('#data-ball-x').text (ball.x);
+  //   $('#data-ball-y').text( ball.y);
+  //   $('#data-debug_1').text ('State: ' + game.state);
+  //   $('#data-debug_2').text ('Blocks left: ' + game.blocksLeft);
+  // }
 
   function updateUI() { 
 
-    $('#level').text(game.level);
-    $('#score').text(game.score);
-    $('#lives').text(game.lives);
+    $('#level').text (game.level);
+    $('#score').text (game.score);
+    $('#lives').text (game.lives);
  
   }
 
   function init() {
 
-    console.log('Init game');
+    console.log ('Init game');
 
     //New game object
     game = new gameSettings();
-    game.init('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft);
+    game.init ('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft);
 
     //New bat object
     bat = new objectBat();
-    bat.init(Defaults.bat.x, Defaults.bat.y, Defaults.bat.w, Defaults.bat.h, Defaults.bat.s, Defaults.bat.borderColor, Defaults.bat.fillColor);
+    bat.init (Defaults.bat.x, Defaults.bat.y, Defaults.bat.w, Defaults.bat.h, Defaults.bat.s, Defaults.bat.borderColor, Defaults.bat.fillColor);
 
     ball = new objectBall();
-    ball.init(Defaults.ball.x, Defaults.ball.y, Defaults.ball.r, Defaults.ball.color, Defaults.ball.dx, Defaults.ball.dxMax, Defaults.ball.dy);
-    ball.changeXSpeed(Defaults.ball.dx);
-    ball.changeYSpeed(Defaults.ball.dy);
+    ball.init (Defaults.ball.x, Defaults.ball.y, Defaults.ball.r, Defaults.ball.color, Defaults.ball.dx, Defaults.ball.dxMax, Defaults.ball.dy);
+//    ball.changeXSpeed (Defaults.ball.dx);
+//    ball.changeYSpeed (Defaults.ball.dy);
 
-    loadLevel();
+    resetGame();
+
+
+    loadLevel ();
+
+    //Add events for the keyboard
+    window.addEventListener ('keyup', function(event) { Key.onKeyup(event); }, false);
+    window.addEventListener ('keydown', function(event) { Key.onKeydown(event); }, false);
 
   }
 
   function loadLevel() {
-    var strLevel   = levels[game.level][1]; 
+    var strLevel   = levels[game.level][2];
     var arrayLevel = 0;
+
+
+    var bc = layouts[levels[game.level][1]].border;
+    var b1 = layouts[levels[game.level][1]].block1;
+    var b2 = layouts[levels[game.level][1]].block2;
+    var b3 = layouts[levels[game.level][1]].block3;
+    var b4 = layouts[levels[game.level][1]].block4;
+    var fc = '#FFFFFF';
 
     for (i=0; i<strLevel.length; i++) {
 
-      if (strLevel[i] === '1') {
-        block[arrayLevel] = new objectBlock();
-        block[arrayLevel].init(Defaults.blocks.startBlockX, Defaults.blocks.startBlockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, 'red', 'gray', 'alive');
+      if ((strLevel[i] != '0') && (strLevel[i] != '-')) {
 
-        //console.log (arrayLevel + ' x: ', block[arrayLevel].x + ' y: ' + block[arrayLevel].y);
+        switch (strLevel[i]) {
+          case '1': fc = b1; break;
+          case '2': fc = b2; break;
+          case '3': fc = b3; break;
+          case '4': fc = b4; break;
+        }
+
+        block[arrayLevel] = new objectBlock();
+        block[arrayLevel].init (Defaults.blocks.startBlockX, Defaults.blocks.startBlockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, bc, fc, 'alive');
 
         Defaults.blocks.startBlockX = Defaults.blocks.startBlockX + Defaults.blocks.blockLength;
         arrayLevel++;
@@ -162,14 +219,16 @@ $( document ).ready(function() {
 
   function run() {
 
-    getInput();
+    getInput ();
+    //moveBat ();
 
     if (game.state === 'run') {
 
-      countDown();
+      countDown ();
 
+      getCollision ();
 
-      getCollision();
+      //moveBall ();
     }
 
     draw();
@@ -178,15 +237,15 @@ $( document ).ready(function() {
 
 
   function countDown() {
-ctx.font = "20px Georgia";
-ctx.fillText("Hello World!", 400, 300);
+// ctx.font = "20px Georgia";
+// ctx.fillText("Hello World!", 400, 300);
   }
 
 
   function draw() {
 
     //Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect (0, 0, canvas.width, canvas.height);
 
     ball.draw();
     bat.draw();
@@ -210,9 +269,6 @@ ctx.fillText("Hello World!", 400, 300);
 
   function getInput() {
 
-    window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
-    window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
-
     if (game.state === 'run') {
       if (Key.isDown(Key.LEFT))  bat.x = bat.x - bat.s; //this.moveLeft();
       if (Key.isDown(Key.RIGHT)) bat.x = bat.x + bat.s; //this.moveRight();
@@ -235,6 +291,16 @@ ctx.fillText("Hello World!", 400, 300);
   }
 
 
+  function resetGame() {
+    ball.dx = Defaults.ball.dx;
+    ball.dy = Defaults.ball.dy;
+    bat.x   = Defaults.bat.x;
+    bat.y   = Defaults.bat.y;
+    bat.w   = Defaults.bat.w;    
+    ball.changePosition(Defaults.ball.x, Defaults.ball.y);
+  }
+
+
   function getCollision() {
 
     //Make sure the bat is not going out of the canvas
@@ -251,15 +317,11 @@ ctx.fillText("Hello World!", 400, 300);
 
         if (ball.dy < 0) {
           game.lives--;
-
+          
           //Resetting ball and bat
           game.state = 'restart';
-          ball.changePosition(Defaults.ball.x, Defaults.ball.y);
-          ball.dx = Defaults.ball.dx;
-          ball.dy = Defaults.ball.dy;
-          bat.x   = Defaults.bat.x;
-          bat.y   = Defaults.bat.y;
-          bat.w   = Defaults.bat.w;
+          resetGame();
+          
 
           if (game.lives === 0) {
             game.state = 'gameover';
@@ -466,8 +528,14 @@ ctx.fillText("Hello World!", 400, 300);
     };
 
     objectBat.prototype.draw = function() {
+
       ctx.beginPath();
       ctx.rect(this.x, this.y, this.w, this.h);
+      
+      //When I really want round corners :)
+      //ctx.lineJoin = "round";
+      //ctx.lineWidth = 10;
+
       ctx.fillStyle = this.fill;
       ctx.fill();
       ctx.lineWidth = 2;
