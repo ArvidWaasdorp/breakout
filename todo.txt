@@ -15,7 +15,7 @@ Create collision on blocks    done   Not briljant, but it works !!!Note see bugs
 Create score                  done   Simple implementation > (26 oct) Improved score and add high score via Cookies
 Create menu                   open   
 Create levels                 done   Must load correctly > (26 Oct) Load new level, increase amount of lives, reset the correct settings 
-Create text                   open   
+Create text                   done   (26 Oct) Added text and countdown function   
 Change angle > hit on site    done   
 Change speed of ball          reject ? Do I want this? > (26 Oct) No, the angle will increase the difficulty and speed
 Add power-ups                 open   
