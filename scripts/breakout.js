@@ -1,15 +1,15 @@
 //Setting the default values for the game
 var Defaults = {
 
-    fps  : 60,
-
   game: {
-    state     : 'start',
+    fps       : 60,
     interval  : 1000,
+    state     : 'start',
     handle    : null,
     level     : 1,
     score     : 0,
     lives     : 3,
+    livesMax  : 5,
     blocks    : 0,
     blocksLeft: 0,
     highscore : 0,
@@ -30,7 +30,7 @@ var Defaults = {
     y          : 500,
     w          : 100,
     h          : 10,
-    s          : 10, //5
+    s          : 6, //5
     borderColor: '#428bca',
     fillColor  : '#5bc0de',
   },
@@ -88,11 +88,11 @@ var layouts = {
 
 };
 
-
 $( document ).ready(function() {
 
   var canvas    = document.getElementById ('gameCanvas');
   var ctx       = canvas.getContext ('2d');
+  var str       = "";
 
   var levels       = [
                        ['0', '', '0 is not a level'],
@@ -118,34 +118,37 @@ $( document ).ready(function() {
     stopLoop();
   });
 
+  $('#pauze-game').click(function(){
+    if ($('#pauze-game').text() === ' Pauze ') {
+      stopLoop();
+      $('#pauze-game').text(' Resume ');
+    } else {
+      startLoop();
+      $('#pauze-game').text(' Pauze ');
+    }
+  });
+
 
   //Init the game. Set default values
   init();
 
   //Run the game
-  console.log ('Running game');
-//  setInterval(run, 10);          //The game loop
 
-//  gameSpeed = setInterval (run, game.interval / Defaults.fps);
-  //clearInterval(run);
 
-  //Functions we can use
-  //Draw some debug information
-  // function drawDebug() {
-  //   $('#data-bat-x').text (bat.x);
-  //   $('#data-bat-y').text (bat.y);
-  //   $('#data-ball-x').text (ball.x);
-  //   $('#data-ball-y').text( ball.y);
-  //   $('#data-debug_1').text ('State: ' + game.state);
-  //   $('#data-debug_2').text ('Blocks left: ' + game.blocksLeft);
-  // }
+  function run() {
 
-  function updateUI() { 
+    debug();
 
-    $('#level').text (game.level);
-    $('#score').text (game.score);
-    $('#lives').text (game.lives);
- 
+    getInput();
+
+    if (game.state === 'run') {
+
+      getCollision ();
+
+      //moveBall ();
+    }
+
+    draw();
   }
 
   function init() {
@@ -174,26 +177,6 @@ $( document ).ready(function() {
 
   }
 
-
-  function stopLoop() {
-    console.log('Stop loop');
-    clearInterval(Defaults.game.handle);
-  }
-
-  function startLoop() {
-    console.log('Start loop');
-    Defaults.game.handle = setInterval (run, game.interval / Defaults.fps);
-  }
-
-
-  function sleep(miliseconds) {
-    var currentTime = new Date().getTime();
-
-    //Really do nothing :)    
-    while (currentTime + miliseconds >= new Date().getTime()) {
-    }
-  }
-
   function loadLevel(level) {
     var strLevel   = levels[game.level][2];
     var arrayLevel = 0;
@@ -204,7 +187,6 @@ $( document ).ready(function() {
     var b3 = layouts[levels[game.level][1]].block3;
     var b4 = layouts[levels[game.level][1]].block4;
     var fc = '#FFFFFF';
-
 
     sleep (2000);
 
@@ -240,50 +222,28 @@ $( document ).ready(function() {
     game.changeBlocksLeft (arrayLevel);
   }
 
-  function run() {
+  // function countDown() {
 
-    //var dirInput = getInput ();
+  //   ctx.font = "30px Arial";
+  //   str = "Ready...";
+  //   str = "Set...";
+  //   str = "Go!!!!";
 
-//    console.log (getInput ());
+  //   ctx.fillText (str, 300, 400);
 
-//    moveBat (dirInput);
+  //   game.state = 'run';
 
-    getInput();
-
-
-    if (game.state === 'run') {
-
-      getCollision ();
-
-      //moveBall ();
-    }
-
-    draw();
-
-  }
-
-  function countDown() {
-
-    ctx.font = "30px Arial";
-    str = "Ready...";
-    str = "Set...";
-    str = "Go!!!!";
-
-    ctx.fillText (str, 300, 400);
-
-    game.state = 'run';
-
-  }
+  // }
 
 
   function draw() {
     //Clear the canvas
     ctx.clearRect (0, 0, canvas.width, canvas.height);
 
-    str = 'Tekst';
 
-    ctx.font = "30px Arial";
-    ctx.fillText (str, 370, 300);
+    drawText(ctx, "Hello!");
+
+
 
 //countDown();
 //      countDown();
@@ -306,7 +266,23 @@ $( document ).ready(function() {
     }
 
     updateUI();
+  }
 
+  function drawText(ctx, str) {
+    ctx.font = "30px Arial";
+    ctx.fillText (str, 370, 300);
+  }
+
+
+  function updateUI() { 
+    var strLives = "";
+
+    $('#level').text (game.level);
+    $('#score').text (game.score);
+
+    for (i=1;i<=Defaults.game.livesMax; i++) {
+      if (i > game.lives)  $('#live' + i).attr("src", 'images/live_empty.png');
+    }    
   }
 
   function getInput() {
@@ -329,8 +305,8 @@ $( document ).ready(function() {
 
     if (Key.isDown(Key.P))   {
       switch (game.state) {
-        case 'run':     game.state = 'pauze'; break;
-        case 'pauze':   game.state = 'run';   break;
+        case 'run':     game.state = 'pauze'; stopLoop();  break;
+        case 'pauze':   game.state = 'run';   startLoop(); break;
       }
     }
   }
@@ -365,6 +341,8 @@ $( document ).ready(function() {
 
           if (game.lives === 0) {
             game.state = 'gameover';
+
+            drawText (ctx, 'Game over :(');
 
             if (game.score > game.highscore) {
               setCookie ('BO_highscore', game.score, 7);
@@ -446,6 +424,7 @@ $( document ).ready(function() {
 
     if (game.blocksLeft === 0) {
       game.state = 'won';
+      game.lives++; 
 
       //function reset game
       //call load level again
@@ -466,7 +445,6 @@ $( document ).ready(function() {
     else var expires = "";
     document.cookie = name + "=" + value+expires + "; path=/";
   }
-
 
   //Get the highscore
   function getCookie(name) {
@@ -566,7 +544,6 @@ $( document ).ready(function() {
       ctx.fill();
       ctx.closePath();
     };
-
   };
 
   //Object Bat
@@ -603,18 +580,16 @@ $( document ).ready(function() {
       this.s = this.s*multiplierS;
     };
 
+    //Make sure the bat is not going out of the canvas
     objectBat.prototype.moveLeft = function() {
       this.x = this.x - this.s;
-
-      //Make sure the bat is not going out of the canvas
-      if (bat.x < 0)                     bat.x = 0;
+      if (bat.x < 0)  bat.x = 0;
     };
 
 
+    //Make sure the bat is not going out of the canvas
     objectBat.prototype.moveRight = function() {
       this.x = this.x + this.s;
-
-      //Make sure the bat is not going out of the canvas
       if (bat.x > (canvas.width-bat.w))  bat.x = (canvas.width-bat.w);
     }
 
@@ -700,4 +675,30 @@ $( document ).ready(function() {
       }
   };
 
+  function stopLoop() {
+    clearInterval(Defaults.game.handle);
+  }
+
+  function startLoop() {
+    clearInterval(Defaults.game.handle);
+    Defaults.game.handle = setInterval (run, (Defaults.game.interval / Defaults.game.fps));
+  }
+
+  function sleep(miliseconds) {
+    var currentTime = new Date().getTime();
+
+    //Really do nothing :)    
+    while (currentTime + miliseconds >= new Date().getTime()) {
+    }
+  }
+
+  function debug() {
+    $('#fps').text(Defaults.game.interval / Defaults.game.fps);
+    $('#batx').text(bat.x);
+    $('#baty').text(bat.y);
+    $('#ballx').text(ball.x);
+    $('#ballxs').text(ball.dx);
+    $('#bally').text(ball.y);
+    $('#ballys').text(ball.dy);
+  }
 });

@@ -25,11 +25,11 @@ h1 {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
 
-  background: #f8f9e9; /* For browsers that do not support gradients */
+  background: #75a8ae;                                  /* For browsers that do not support gradients */
   background: -webkit-linear-gradient(#75a8ae, #FFF); /* For Safari 5.1 to 6.0 */
-  background: -o-linear-gradient(#75a8ae,  #FFF); /* For Opera 11.1 to 12.0 */
-  background: -moz-linear-gradient(#75a8ae, #FFF); /* For Firefox 3.6 to 15 */
-  background: linear-gradient(#75a8ae, #FFF); /* Standard syntax */
+  background: -o-linear-gradient(#75a8ae,  #FFF);     /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#75a8ae, #FFF);    /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#75a8ae, #FFF);         /* Standard syntax */
 }
 
 /*.container {
@@ -76,7 +76,30 @@ h1 {
   /*border: 1px solid #000;*/
 }
 
+#pauze-game {
+  font-family: FREEDOM;
+  background: #e2fcff;
+  font-size: 16px;
+  width: 144px;
+  margin-top: 40px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 
+  border: 1px solid #25545b;
+  color: #000;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
+#pauze-game:hover {
+  background: #f8f9e9;
+}
+
+.lives {
+  transform: scale(1.7);
+}
 
 /*
 Make the canvas resonsive
@@ -114,4 +137,3 @@ And above :D: > 1200px
     height:480px;
   }
 }
-
