@@ -5,11 +5,14 @@ var Defaults = {
 
   game: {
     state     : 'start',
-    level     : 5,
+    interval  : 1000,
+    handle    : null,
+    level     : 1,
     score     : 0,
     lives     : 3,
     blocks    : 0,
     blocksLeft: 0,
+    highscore : 0,
   },
 
   ball: {
@@ -38,15 +41,7 @@ var Defaults = {
     blockLength : 40,
     blockHeight : 20,
     blockSpacing: 0,
-  },
-
-  state: {
-    initial: 'menu',
-    events: [
-      { name: 'play',    from: 'menu', to: 'game' },
-      { name: 'abandon', from: 'game', to: 'menu' },
-      { name: 'lose',    from: 'game', to: 'menu' }
-  ]}
+  }
 };
 
 var layouts = {
@@ -94,8 +89,6 @@ var layouts = {
 };
 
 
-
-
 $( document ).ready(function() {
 
   var canvas    = document.getElementById ('gameCanvas');
@@ -116,6 +109,15 @@ $( document ).ready(function() {
   var ball         = null;
   var block        = [];
 
+  $('#start').click(function(){
+    startLoop();
+  });
+
+
+  $('#stop').click(function(){
+    stopLoop();
+  });
+
 
   //Init the game. Set default values
   init();
@@ -124,7 +126,8 @@ $( document ).ready(function() {
   console.log ('Running game');
 //  setInterval(run, 10);          //The game loop
 
-  setInterval (run, 1000 / Defaults.fps);
+//  gameSpeed = setInterval (run, game.interval / Defaults.fps);
+  //clearInterval(run);
 
   //Functions we can use
   //Draw some debug information
@@ -159,11 +162,9 @@ $( document ).ready(function() {
 
     ball = new objectBall();
     ball.init (Defaults.ball.x, Defaults.ball.y, Defaults.ball.r, Defaults.ball.color, Defaults.ball.dx, Defaults.ball.dxMax, Defaults.ball.dy);
-//    ball.changeXSpeed (Defaults.ball.dx);
-//    ball.changeYSpeed (Defaults.ball.dy);
-
     resetGame();
 
+    game.highscore = getCookie('BO_highscore'); 
 
     loadLevel ();
 
@@ -173,10 +174,29 @@ $( document ).ready(function() {
 
   }
 
-  function loadLevel() {
+
+  function stopLoop() {
+    console.log('Stop loop');
+    clearInterval(Defaults.game.handle);
+  }
+
+  function startLoop() {
+    console.log('Start loop');
+    Defaults.game.handle = setInterval (run, game.interval / Defaults.fps);
+  }
+
+
+  function sleep(miliseconds) {
+    var currentTime = new Date().getTime();
+
+    //Really do nothing :)    
+    while (currentTime + miliseconds >= new Date().getTime()) {
+    }
+  }
+
+  function loadLevel(level) {
     var strLevel   = levels[game.level][2];
     var arrayLevel = 0;
-
 
     var bc = layouts[levels[game.level][1]].border;
     var b1 = layouts[levels[game.level][1]].block1;
@@ -184,6 +204,9 @@ $( document ).ready(function() {
     var b3 = layouts[levels[game.level][1]].block3;
     var b4 = layouts[levels[game.level][1]].block4;
     var fc = '#FFFFFF';
+
+
+    sleep (2000);
 
     for (i=0; i<strLevel.length; i++) {
 
@@ -219,12 +242,16 @@ $( document ).ready(function() {
 
   function run() {
 
-    getInput ();
-    //moveBat ();
+    //var dirInput = getInput ();
+
+//    console.log (getInput ());
+
+//    moveBat (dirInput);
+
+    getInput();
+
 
     if (game.state === 'run') {
-
-      countDown ();
 
       getCollision ();
 
@@ -235,17 +262,36 @@ $( document ).ready(function() {
 
   }
 
-
   function countDown() {
-// ctx.font = "20px Georgia";
-// ctx.fillText("Hello World!", 400, 300);
+
+    ctx.font = "30px Arial";
+    str = "Ready...";
+    str = "Set...";
+    str = "Go!!!!";
+
+    ctx.fillText (str, 300, 400);
+
+    game.state = 'run';
+
   }
 
 
   function draw() {
-
     //Clear the canvas
     ctx.clearRect (0, 0, canvas.width, canvas.height);
+
+    str = 'Tekst';
+
+    ctx.font = "30px Arial";
+    ctx.fillText (str, 370, 300);
+
+//countDown();
+//      countDown();
+
+//    if (game.state === 'ready_run') {
+//      sleep (1000);
+//    }
+
 
     ball.draw();
     bat.draw();
@@ -255,12 +301,8 @@ $( document ).ready(function() {
 
     for (i=0; i<game.blocks; i++) {
       if (block[i].status === 'alive') {
-        block[i].draw();
+        block[i].draw ();
       }
-    }
-
-    if ($('#debug').is(':checked') === true) {
-      drawDebug();
     }
 
     updateUI();
@@ -269,16 +311,19 @@ $( document ).ready(function() {
 
   function getInput() {
 
-    if (game.state === 'run') {
-      if (Key.isDown(Key.LEFT))  bat.x = bat.x - bat.s; //this.moveLeft();
-      if (Key.isDown(Key.RIGHT)) bat.x = bat.x + bat.s; //this.moveRight();
+    if ((game.state === 'run') || (game.state === 'play') || (game.state === 'restart')) {
+      if (Key.isDown(Key.LEFT))  bat.moveLeft();
+      if (Key.isDown(Key.RIGHT)) bat.moveRight();
     }
+
+    if (Key.isDown(Key.DOWN)) stopLoop();
+    if (Key.isDown(Key.UP)) startLoop();
 
     //Input here :D
     if (Key.isDown(Key.SPACE))   {
       switch (game.state) {
-        case 'play':     game.state = 'run';   break;
-        case 'restart':  game.state = 'run';   break;
+        case 'play':     game.state = 'run';  break; //ready_run
+        case 'restart':  game.state = 'run';  break;
       }
     }
 
@@ -297,15 +342,11 @@ $( document ).ready(function() {
     bat.x   = Defaults.bat.x;
     bat.y   = Defaults.bat.y;
     bat.w   = Defaults.bat.w;    
-    ball.changePosition(Defaults.ball.x, Defaults.ball.y);
+    ball.changePosition (Defaults.ball.x, Defaults.ball.y);
   }
 
 
   function getCollision() {
-
-    //Make sure the bat is not going out of the canvas
-    if (bat.x < 0)                     bat.x = 0;
-    if (bat.x > (canvas.width-bat.w))  bat.x = (canvas.width-bat.w);
 
     //Doe stuiter-shit met the ball
     if(ball.x + ball.dx > canvas.width-ball.r || ball.x + ball.dx < ball.r) {
@@ -321,10 +362,14 @@ $( document ).ready(function() {
           //Resetting ball and bat
           game.state = 'restart';
           resetGame();
-          
 
           if (game.lives === 0) {
             game.state = 'gameover';
+
+            if (game.score > game.highscore) {
+              setCookie ('BO_highscore', game.score, 7);
+            }
+
           }
         }
     }
@@ -406,9 +451,40 @@ $( document ).ready(function() {
       //call load level again
       //reset state, keep score 
       //level+1
-
     }
   }
+
+  //*******************************************************
+  //| Use cookies to set the highscore
+  //| Write the highscore
+  function setCookie(name, value, days) {
+    if (days) {
+        var date = new Date ();
+        date.setTime (date.getTime () + (days*24*60*60*1000));
+        var expires = "; expires=" +date.toGMTString ();
+    }
+    else var expires = "";
+    document.cookie = name + "=" + value+expires + "; path=/";
+  }
+
+
+  //Get the highscore
+  function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split (';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring (1,c.length);
+        if (c.indexOf (nameEQ) == 0) return c.substring (nameEQ.length,c.length);
+    }
+    return null;
+  }
+
+  function eraseCookie(name) {
+    createCookie(name,"",-1);
+  }
+  //| End of high-score-section
+  //*******************************************************
 
   function gameSettings(state, level, score, lives, blocks, blocksLeft) {
 
@@ -499,10 +575,10 @@ $( document ).ready(function() {
     this.x = x;
     this.y = y;
     this.w = w;
-    this.h = h;
-    this.s = s;
+    this.h  = h;
+    this.s      = s;
     this.border = borderColor;
-    this.fill = fillColor;
+    this.fill   = fillColor;
 
     objectBat.prototype.init = function(x, y, w, h, s, borderColor, fillColor) {
       this.x = x;
@@ -527,41 +603,56 @@ $( document ).ready(function() {
       this.s = this.s*multiplierS;
     };
 
+    objectBat.prototype.moveLeft = function() {
+      this.x = this.x - this.s;
+
+      //Make sure the bat is not going out of the canvas
+      if (bat.x < 0)                     bat.x = 0;
+    };
+
+
+    objectBat.prototype.moveRight = function() {
+      this.x = this.x + this.s;
+
+      //Make sure the bat is not going out of the canvas
+      if (bat.x > (canvas.width-bat.w))  bat.x = (canvas.width-bat.w);
+    }
+
     objectBat.prototype.draw = function() {
 
-      ctx.beginPath();
-      ctx.rect(this.x, this.y, this.w, this.h);
+      ctx.beginPath ();
+      ctx.rect (this.x, this.y, this.w, this.h);
       
       //When I really want round corners :)
       //ctx.lineJoin = "round";
       //ctx.lineWidth = 10;
 
       ctx.fillStyle = this.fill;
-      ctx.fill();
-      ctx.lineWidth = 2;
+      ctx.fill ();
+      ctx.lineWidth  = 2;
       ctx.strokeStyle = this.border;
-      ctx.stroke();
+      ctx.stroke ();
     };
    
   };
 
   //Object Blocks
   function objectBlock(x, y, w, h, borderColor, fillColor, status) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
+    this.x      = x;
+    this.y      = y;
+    this.w      = w;
+    this.h      = h;
     this.border = borderColor;
-    this.fill = fillColor;
+    this.fill   = fillColor;
     this.status = status;
 
     objectBlock.prototype.init = function(x, y, w, h, borderColor, fillColor, status) {
-      this.x = x;
-      this.y = y;
-      this.w = w;
-      this.h = h;
+      this.x      = x;
+      this.y      = y;
+      this.w      = w;
+      this.h      = h;
       this.border = borderColor;
-      this.fill = fillColor;
+      this.fill   = fillColor;
       this.status = status;
     };
 
@@ -570,13 +661,13 @@ $( document ).ready(function() {
     };
 
     objectBlock.prototype.draw = function() {
-      ctx.beginPath();
-      ctx.rect(this.x, this.y, this.w, this.h);
-      ctx.fillStyle = this.fill;
-      ctx.fill();
-      ctx.lineWidth = 1;
+      ctx.beginPath ();
+      ctx.rect (this.x, this.y, this.w, this.h);
+      ctx.fillStyle   = this.fill;
+      ctx.fill ();
+      ctx.lineWidth   = 1;
       ctx.strokeStyle = this.border;
-      ctx.stroke();
+      ctx.stroke ();
     };
    
   };
