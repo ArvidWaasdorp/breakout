@@ -5,6 +5,7 @@ var Defaults = {
     fps       : 60,
     interval  : 1000,
     state     : 'start',
+    statePrev : '',
     handle    : null,
     level     : 1,
     score     : 0,
@@ -157,10 +158,10 @@ $( document ).ready(function() {
 
     getInput();                 //Get user input
 
-    if (game.state === 'run') {
+    //if (game.state === 'run') {
       getCollision ();
       //moveBall ();
-    }
+    //}
 
     draw();                      //Funtion to draw all the elements that needs to be refresed every cycle
   }
@@ -252,36 +253,11 @@ $( document ).ready(function() {
     game.changeBlocksLeft (arrayLevel);
   }
 
-  // function countDown() {
-
-  //   ctx.font = "30px Arial";
-  //   str = "Ready...";
-  //   str = "Set...";
-  //   str = "Go!!!!";
-
-  //   ctx.fillText (str, 300, 400);
-
-  //   game.state = 'run';
-
-  // }
-
-
   function draw() {
     //Clear the canvas
     ctx.clearRect (0, 0, canvas.width, canvas.height);
 
-
     drawText(ctx, "Hello!");
-
-
-
-//countDown();
-//      countDown();
-
-//    if (game.state === 'ready_run') {
-//      sleep (1000);
-//    }
-
 
     ball.draw();
     bat.draw();
@@ -320,26 +296,19 @@ $( document ).ready(function() {
 
   function getInput() {
 
-    if ((game.state === 'run') || (game.state === 'play') || (game.state === 'restart')) {
+    if ((game.state === 'run') || (game.state === 'restart') || (game.state === 'play')) {
+      game.statePrev = game.state;
+
       if (Key.isDown(Key.LEFT))  bat.moveLeft();
       if (Key.isDown(Key.RIGHT)) bat.moveRight();
     }
 
-    if (Key.isDown(Key.DOWN)) stopLoop();
-    if (Key.isDown(Key.UP)) startLoop();
-
     //Input here :D
     if (Key.isDown(Key.SPACE))   {
+      game.statePrev = game.state;
       switch (game.state) {
         case 'play':     game.state = 'run';  break; //ready_run
         case 'restart':  game.state = 'run';  break;
-      }
-    }
-
-    if (Key.isDown(Key.P))   {
-      switch (game.state) {
-        case 'run':     game.state = 'pauze'; stopLoop();  break;
-        case 'pauze':   game.state = 'run';   startLoop(); break;
       }
     }
   }
@@ -356,126 +325,130 @@ $( document ).ready(function() {
 
   function getCollision() {
 
-    //Doe stuiter-shit met the ball
-    if(ball.x + ball.dx > canvas.width-ball.r || ball.x + ball.dx < ball.r) {
-        ball.dx = -ball.dx;
-    }
-
-    if(ball.y + ball.dy > canvas.height-ball.r || ball.y + ball.dy < ball.r) {
-        ball.dy = -ball.dy;
-
-        if (ball.dy < 0) {
-          game.lives--;
-          
-          //Resetting ball and bat
-          game.state = 'restart';
-          resetGame();
-
-          if (game.lives === 0) {
-            game.state = 'gameover';
-
-            drawText (ctx, 'Game over :(');
-            
-
-            if (game.score > game.highscore) {
-              setCookie ('BO_highscore', game.score, 7);
-            }
-
-          }
-        }
-    }
-
-    //Collision of the bat
-    if (((ball.x+ball.r/2 >= bat.x) && (ball.x-ball.r/2 <= bat.x+bat.w)) && ((ball.y+ball.r/2 >= bat.y) && (ball.y-ball.r/2 <= bat.y+bat.h))) {
-      var posBallBat = ball.x - bat.x;
-
-      if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)) && ((ball.y >= bat.y) && (ball.y <= bat.y+bat.h))) {
-        //console.log ('Side');
-        ball.dx = -ball.dx;
-        ball.dy = +ball.dy;
+    if (game.state === 'run') {
+      //Doe stuiter-shit met the ball
+      if(ball.x + ball.dx > canvas.width-ball.r || ball.x + ball.dx < ball.r) {
+          ball.dx = -ball.dx;
       }
 
-      if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)))  {
-        if (ball.y <= bat.y) {
-          //console.log ('Top');
-
-          //Callculate the new angle of the ball. End of the bat is max y, mid of the bat min y 
-          if (posBallBat > (bat.w/2)) {
-            var newX = (bat.w/2) - posBallBat;
-            ball.dx = ball.dxMax * (newX / -(bat.w/2));
-          } else {
-
-            var newX = (bat.w/2) - posBallBat;
-            ball.dx = ball.dxMax * (newX / -(bat.w/2));
-          }
-
-            ball.dx = +ball.dx;
-            ball.dy = -ball.dy;
-        } 
-
-        if ((ball.x <= bat.x+bat.w) && (ball.y >= bat.y+bat.h)) {
-          //console.log ('Bottom');
-          ball.dx = +ball.dx;
+      if(ball.y + ball.dy > canvas.height-ball.r || ball.y + ball.dy < ball.r) {
           ball.dy = -ball.dy;
-        }
+
+          if (ball.dy < 0) {
+            game.lives--;
+            
+            //Resetting ball and bat
+            game.state = 'restart';
+            resetGame();
+
+            if (game.lives === 0) {
+              game.state = 'gameover';
+
+              drawText (ctx, 'Game over :(');
+              
+
+              if (game.score > game.highscore) {
+                setCookie ('BO_highscore', game.score, 7);
+              }
+
+            }
+          }
       }
 
-    }
+      //Collision of the bat
+      if (((ball.x+ball.r/2 >= bat.x) && (ball.x-ball.r/2 <= bat.x+bat.w)) && ((ball.y+ball.r/2 >= bat.y) && (ball.y-ball.r/2 <= bat.y+bat.h))) {
+        var posBallBat = ball.x - bat.x;
 
-    //Collision of the blocks
-    for (i=0; i<game.blocks; i++) {
-
-      if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].status === 'alive')) {
-
-        if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
+        if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)) && ((ball.y >= bat.y) && (ball.y <= bat.y+bat.h))) {
           //console.log ('Side');
           ball.dx = -ball.dx;
           ball.dy = +ball.dy;
         }
 
-        if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)))  {
-          if (ball.y <= block[i].y) {
+        if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)))  {
+          if (ball.y <= bat.y) {
             //console.log ('Top');
-            ball.dx = +ball.dx;
-            ball.dy = -ball.dy;
+
+            //Callculate the new angle of the ball. End of the bat is max y, mid of the bat min y 
+            if (posBallBat > (bat.w/2)) {
+              var newX = (bat.w/2) - posBallBat;
+              ball.dx = ball.dxMax * (newX / -(bat.w/2));
+            } else {
+
+              var newX = (bat.w/2) - posBallBat;
+              ball.dx = ball.dxMax * (newX / -(bat.w/2));
+            }
+
+              ball.dx = +ball.dx;
+              ball.dy = -ball.dy;
           } 
-          if ((ball.x <= block[i].x+block[i].w) && (ball.y >= block[i].y+block[i].h)) {
+
+          if ((ball.x <= bat.x+bat.w) && (ball.y >= bat.y+bat.h)) {
             //console.log ('Bottom');
             ball.dx = +ball.dx;
             ball.dy = -ball.dy;
           }
         }
-        block[i].status = 'dead';
-        game.blocksLeft--;
-        game.score += 10;
+
       }
-    }
 
-    if (game.state != 'pauze') {
-      ball.changePosition(ball.x + ball.dx, ball.y + ball.dy);
-    }
+      //Collision of the blocks
+      for (i=0; i<game.blocks; i++) {
 
-    //You have won the level!!!!
-    if (game.blocksLeft === 0) {
-//      game.state = 'won';
+        if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].status === 'alive')) {
 
-      game.lives++;
-      game.level++;
+          if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
+            //console.log ('Side');
+            ball.dx = -ball.dx;
+            ball.dy = +ball.dy;
+          }
 
-      loadLevel();
+          if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)))  {
+            if (ball.y <= block[i].y) {
+              //console.log ('Top');
+              ball.dx = +ball.dx;
+              ball.dy = -ball.dy;
+            } 
+            if ((ball.x <= block[i].x+block[i].w) && (ball.y >= block[i].y+block[i].h)) {
+              //console.log ('Bottom');
+              ball.dx = +ball.dx;
+              ball.dy = -ball.dy;
+            }
+          }
+          block[i].status = 'dead';
+          game.blocksLeft--;
+          game.score += 10;
+        }
+      }
 
-      game.state = 'restart';
+      if (game.state != 'pauze') {
+        ball.changePosition(ball.x + ball.dx, ball.y + ball.dy);
+      }
 
-      console.log('Level: ' + game.level);
-      console.log('State: ' + game.state);
-      console.log('Lives: ' + game.lives);
+      //You have won the level!!!!
+      if (game.blocksLeft === 0) {
+  //      game.state = 'won';
 
-      resetGame();
+        game.lives++;
+        game.level++;
 
-      //function reset game
-      //call load level again
-      //reset state, keep score 
-      //level+1
+        loadLevel();
+
+        game.state = 'restart';
+
+        console.log('Level: ' + game.level);
+        console.log('State: ' + game.state);
+        console.log('Lives: ' + game.lives);
+
+        resetGame();
+
+        //function reset game
+        //call load level again
+        //reset state, keep score 
+        //level+1
+      }
+    } else {
+       ball.changePosition(bat.x + 50, Defaults.ball.y);
     }
   }
 
@@ -743,12 +716,13 @@ $( document ).ready(function() {
   function debug() {
     $('#debug').show();
 
-    $('#fps').text(Defaults.game.interval / Defaults.game.fps);
-    $('#batx').text(bat.x);
-    $('#baty').text(bat.y);
-    $('#ballx').text(ball.x);
-    $('#ballxs').text(ball.dx);
-    $('#bally').text(ball.y);
-    $('#ballys').text(ball.dy);
+    $('#fps').text(Math.round(Defaults.game.interval / Defaults.game.fps));
+    $('#state').text(game.state);
+    $('#batx').text(Math.round(bat.x));
+    $('#baty').text(Math.round(bat.y));
+    $('#ballx').text(Math.round(ball.x));
+    $('#ballxs').text(Math.round(ball.dx));
+    $('#bally').text(Math.round(ball.y));
+    $('#ballys').text(Math.round(ball.dy));
   }
 });
