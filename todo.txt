@@ -6,29 +6,26 @@ Create ball                   done
 Move ball                     done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
 Let ball bounch               done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
 Create collision on wall      done   https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Bounce_off_the_walls
-Make use of object            done
+Make use of object            done   
 Create collision on bat       done   Not briljant, but it works
-Re-use bat-object for blocks  open   ? Does I want this? Works oke now
-Create blocks                 done
-Remove blocks                 done
+Re-use bat-object for blocks  reject ? Does I want this? Works oke now > (26 Oct) No 
+Create blocks                 done   
+Remove blocks                 done   
 Create collision on blocks    done   Not briljant, but it works !!!Note see bugs!!!  
-Create score                  open   Simple implementation
-Create menu                   open
+Create score                  done   Simple implementation > (26 oct) Improved score and add high score via Cookies
+Create menu                   open   
 Create levels                 open   Must load correctly
-Change angle > hit on site    done
-Change speed of ball          open   ? Do I want this?
-Add power-ups                 open
-Launch game on [space]        done   Simple implementation, see B2
-Add lives                     open   Simple implementation, game stops nothing happends
+Create text                   open   
+Change angle > hit on site    done   
+Change speed of ball          reject ? Do I want this? > (26 Oct) No, the angle will increase the difficulty and speed
+Add power-ups                 open   
+Launch game on [space]        done   Simple implementation, see B2 > (26 Oct) Solved by adding a button that stops the game loop and restart it again
+Add lives                     done   Simple implementation, game stops nothing happends > (26 Oct) Added max lives and min lives.
 
 Usefull links:
 http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-with-javascript-jquery
 https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
 ! https://github.com/jakesgordon/javascript-breakout
-
-
-fps: 1000.0 / this.fps
-
 
 
 Help for collision detection 
@@ -39,5 +36,5 @@ https://www.google.nl/search?q=this.pressed+slows+browser&oq=this.pressed+slows+
 https://developer.mozilla.org/nl/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
 
 
-B1) BUG dat bal door de blokken gaat. Gebeurt nu vooral wanneer de bal van rechts boven naar links gaat!!!! 
-B2) Space hangs :(, difficult to pauze and start the game again
+open -        - B1) BUG dat bal door de blokken gaat. Gebeurt nu vooral wanneer de bal van rechts boven naar links gaat!!!! 
+done - 26 Oct - B2) Space hangs :(, difficult to pauze and start the game again

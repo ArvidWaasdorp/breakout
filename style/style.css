@@ -32,10 +32,6 @@ h1 {
   background: linear-gradient(#75a8ae, #FFF);         /* Standard syntax */
 }
 
-/*.container {
-  border: 1px solid #000;
-}*/
-
 .score-wrapper {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
@@ -68,14 +64,6 @@ h1 {
   background: #75a8ae;
 }
 
-.col-md-10 {
-  /*border: 1px solid #000;*/
-}
-
-.col-md-12 {
-  /*border: 1px solid #000;*/
-}
-
 #pauze-game {
   font-family: FREEDOM;
   background: #e2fcff;
@@ -84,6 +72,7 @@ h1 {
   margin-top: 40px;
   padding-top: 10px;
   padding-bottom: 10px;
+  margin-bottom: 20px;
 
   border: 1px solid #25545b;
   color: #000;
@@ -97,8 +86,17 @@ h1 {
   background: #f8f9e9;
 }
 
+#pauze-game:disabled {
+  color: #dddddd;
+  background: #f8f9e9;
+}
+
 .lives {
   transform: scale(1.7);
+}
+
+.debug {
+  padding-left: 5px;
 }
 
 /*

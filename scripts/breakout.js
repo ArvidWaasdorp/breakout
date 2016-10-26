@@ -30,13 +30,12 @@ var Defaults = {
     y          : 500,
     w          : 100,
     h          : 10,
-    s          : 6, //5
+    s          : 8, //5
     borderColor: '#428bca',
     fillColor  : '#5bc0de',
   },
 
   blocks: {
-    startBlockX : 0,
     startBlockY : 50,
     blockLength : 40,
     blockHeight : 20,
@@ -90,34 +89,51 @@ var layouts = {
 
 $( document ).ready(function() {
 
-  var canvas    = document.getElementById ('gameCanvas');
-  var ctx       = canvas.getContext ('2d');
+  //**************************************************
+  //| Global variables used in the game
+  var canvas    = document.getElementById ('gameCanvas');   //Get the canvas to draw the game onto
+  var ctx       = canvas.getContext ('2d');                 //Set the context to 2D graphics
   var str       = "";
 
+  //| The defined levels
+  //| field 0 = level ID, first item in the array is not a level
+  //| field 1 = layout, what color scheme to be used
+  //| field 2 = the level
+  //|            0) no block 
+  //|            1 till 4) scheme colors
+  //|            4) Scheme 4
+  //|            -) Next line
   var levels       = [
                        ['0', '', '0 is not a level'],
-                       ['1', 'google',     '10100023432341243240-11001123234141441111-11412411341121213111-04124023003203010000-14134130032412311010-11113213120013211111-14132113211340341111'],
-                       ['2', 'microsoft',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
-                       ['3', 'facebook',   '10101324231422431010-02313123123410111100-32134123412321341231-31230123031301320414-03123023213030130312-03123013201230123130-04124412421432424212'],
-                       ['4', 'caucasian',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
-                       ['5', 'pastel',     '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+                       ['1', 'google',     '00000000000000000000-00000000000000001000-00000000000000000000-00000000000000000000-00000000000000000000-00000000000000000000-00000000000000000000'],
+                       ['2', 'google',     '10100023432341243240-11001123234141441111-11412411341121213111-04124023003203010000-14134130032412311010-11113213120013211111-14132113211340341111'],
+                       ['3', 'microsoft',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+                       ['4', 'facebook',   '10101324231422431010-02313123123410111100-32134123412321341231-31230123031301320414-03123023213030130312-03123013201230123130-04124412421432424212'],
+                       ['5', 'caucasian',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+                       ['6', 'pastel',     '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
                      ];
+  
+  var game         = null;    //Game object, stores generic variabales of the game like; lives, score, blocks left
+  var bat          = null;    //Bat object, stores generic variables like; size, speed, width. Also give access to methodes like move left and move right
+  var ball         = null;    //Ball object, stores generic variables like; size, speed, radius. Also give access to methodes
+  var block        = [];      //Array of block objects,  stores generic variables like; color, x-pos, y-pos and status. Also give access to methodes
+  //**************************************************
 
-  //De objecten
-  var game         = null;
-  var bat          = null;
-  var ball         = null;
-  var block        = [];
-
+  //**************************************************
+  //| Current implementation of starting and stopping the game
   $('#start').click(function(){
     startLoop();
   });
-
-
   $('#stop').click(function(){
     stopLoop();
   });
+  //| Current implementation of starting and stopping the game
+  //**************************************************
 
+  //**************************************************
+  //| Set the game on pauze
+  //| Check the status and based on that the game will be paused.
+  //| Also the text on the button will changed
   $('#pauze-game').click(function(){
     if ($('#pauze-game').text() === ' Pauze ') {
       stopLoop();
@@ -127,59 +143,73 @@ $( document ).ready(function() {
       $('#pauze-game').text(' Pauze ');
     }
   });
-
+  //**************************************************
 
   //Init the game. Set default values
   init();
 
-  //Run the game
 
-
+  //********************************************
+  //| The game loop
   function run() {
 
-    debug();
+    debug();                    //Show debug information
 
-    getInput();
+    getInput();                 //Get user input
 
     if (game.state === 'run') {
-
       getCollision ();
-
       //moveBall ();
     }
 
-    draw();
+    draw();                      //Funtion to draw all the elements that needs to be refresed every cycle
   }
+  //| End of the loop
+  //********************************************
 
   function init() {
 
-    console.log ('Init game');
+    //console.log ('Init game');
+    
+    $('#pauze-game').prop('disabled', true);    //Disable the pauze-button by default (page load)
+    $('#debug').hide();                         //Hide the debug-div by default (page load)
 
-    //New game object
+    //*******************************************************
+    //| New game object and initalize it
+    //| It uses the variables in the Defaults-object
     game = new gameSettings();
     game.init ('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft);
 
-    //New bat object
+    //New bat object and initalize it
+    //| It uses the variables in the Defaults-object
     bat = new objectBat();
     bat.init (Defaults.bat.x, Defaults.bat.y, Defaults.bat.w, Defaults.bat.h, Defaults.bat.s, Defaults.bat.borderColor, Defaults.bat.fillColor);
 
+    //New ball object and initalize it
+    //| It uses the variables in the Defaults-object
     ball = new objectBall();
     ball.init (Defaults.ball.x, Defaults.ball.y, Defaults.ball.r, Defaults.ball.color, Defaults.ball.dx, Defaults.ball.dxMax, Defaults.ball.dy);
+    //*******************************************************
+    
+    //Rest the bat and ball to their staring position    
     resetGame();
 
+    //Retrieve the highscore of the user stored in a cookie
     game.highscore = getCookie('BO_highscore'); 
 
+    //Load the level
     loadLevel ();
 
     //Add events for the keyboard
     window.addEventListener ('keyup', function(event) { Key.onKeyup(event); }, false);
     window.addEventListener ('keydown', function(event) { Key.onKeydown(event); }, false);
-
   }
 
-  function loadLevel(level) {
+  function loadLevel() {
     var strLevel   = levels[game.level][2];
     var arrayLevel = 0;
+    var blockX     = Defaults.blocks.startBlockX;
+    var blockY     = Defaults.blocks.startBlockY;
 
     var bc = layouts[levels[game.level][1]].border;
     var b1 = layouts[levels[game.level][1]].block1;
@@ -202,19 +232,19 @@ $( document ).ready(function() {
         }
 
         block[arrayLevel] = new objectBlock();
-        block[arrayLevel].init (Defaults.blocks.startBlockX, Defaults.blocks.startBlockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, bc, fc, 'alive');
+        block[arrayLevel].init (blockX, blockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, bc, fc, 'alive');
 
-        Defaults.blocks.startBlockX = Defaults.blocks.startBlockX + Defaults.blocks.blockLength;
+        blockX = blockX + Defaults.blocks.blockLength;
         arrayLevel++;
       }
 
       if (strLevel[i] === '0') {
-        Defaults.blocks.startBlockX = Defaults.blocks.startBlockX + Defaults.blocks.blockLength;
+        blockX = blockX + Defaults.blocks.blockLength;
       }
 
       if (strLevel[i] === '-') {
-        Defaults.blocks.startBlockX = 0;
-        Defaults.blocks.startBlockY = Defaults.blocks.startBlockY + Defaults.blocks.blockHeight + Defaults.blocks.blockSpacing;
+        blockX = 0;
+        blockY = blockY + Defaults.blocks.blockHeight + Defaults.blocks.blockSpacing;
       }
     }
 
@@ -273,17 +303,20 @@ $( document ).ready(function() {
     ctx.fillText (str, 370, 300);
   }
 
-
+  //**********************************************************
+  //| Draw the UI components that needs to be refreshed every frame
   function updateUI() { 
-    var strLives = "";
+    $('#level').text (game.level);  //Display the level in the span-level
+    $('#score').text (game.score);  //Display the score in the span-level
 
-    $('#level').text (game.level);
-    $('#score').text (game.score);
-
+    //Display the live-hearts. The maximum of hearts is 5
     for (i=1;i<=Defaults.game.livesMax; i++) {
-      if (i > game.lives)  $('#live' + i).attr("src", 'images/live_empty.png');
+      $('#live' + i).attr("src", 'images/live_full.png');                       //Set all the hearts to full
+      if (i > game.lives)  $('#live' + i).attr("src", 'images/live_empty.png'); //Change the hearts to empty of the amount that the player died in the game 
     }    
   }
+  //| End of function
+  //**********************************************************
 
   function getInput() {
 
@@ -310,7 +343,6 @@ $( document ).ready(function() {
       }
     }
   }
-
 
   function resetGame() {
     ball.dx = Defaults.ball.dx;
@@ -343,6 +375,7 @@ $( document ).ready(function() {
             game.state = 'gameover';
 
             drawText (ctx, 'Game over :(');
+            
 
             if (game.score > game.highscore) {
               setCookie ('BO_highscore', game.score, 7);
@@ -422,9 +455,22 @@ $( document ).ready(function() {
       ball.changePosition(ball.x + ball.dx, ball.y + ball.dy);
     }
 
+    //You have won the level!!!!
     if (game.blocksLeft === 0) {
-      game.state = 'won';
-      game.lives++; 
+//      game.state = 'won';
+
+      game.lives++;
+      game.level++;
+
+      loadLevel();
+
+      game.state = 'restart';
+
+      console.log('Level: ' + game.level);
+      console.log('State: ' + game.state);
+      console.log('Lives: ' + game.lives);
+
+      resetGame();
 
       //function reset game
       //call load level again
@@ -682,6 +728,8 @@ $( document ).ready(function() {
   function startLoop() {
     clearInterval(Defaults.game.handle);
     Defaults.game.handle = setInterval (run, (Defaults.game.interval / Defaults.game.fps));
+    $('#pauze-game').prop('disabled', false);
+
   }
 
   function sleep(miliseconds) {
@@ -693,6 +741,8 @@ $( document ).ready(function() {
   }
 
   function debug() {
+    $('#debug').show();
+
     $('#fps').text(Defaults.game.interval / Defaults.game.fps);
     $('#batx').text(bat.x);
     $('#baty').text(bat.y);
