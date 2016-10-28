@@ -13,6 +13,7 @@ var Defaults = {
     blocks    : 0,
     blocksLeft: 0,
     highscore : 0,
+    powerup   : '',
   },
 
   ball: {
@@ -20,9 +21,9 @@ var Defaults = {
     y    : 490,
     r    : 7,
     color: '#d9534f',
-    dx   : 3,  //2
-    dxMax: 8,  //6
-    dy   : -7, //-3
+    dx   : 0.5,  //3
+    dxMax: 1,  //8
+    dy   : -2, //-7
   },
 
   bat: {
@@ -33,6 +34,17 @@ var Defaults = {
     s          : 8, //5
     borderColor: '#428bca',
     fillColor  : '#5bc0de',
+  },
+
+  powerup: {
+    x          : 0,
+    y          : 0,
+    r          : 7,
+    w          : 15,
+    h          : 15,
+    s          : 3, //6
+    color      : 'yellow',
+    time       : 240,       //amount of cycles the powerup is active. 16*15seconds
   },
 
   blocks: {
@@ -92,16 +104,20 @@ $( document ).ready(function() {
 
   //********************************************
   //| Global variables used in the game
-  var canvas        = document.getElementById ('gameCanvas');   //Get the canvas to draw the game onto
-  var ctx           = canvas.getContext ('2d');                 //Set the context to 2D graphics
-  var str           = '';
+  var canvas          = document.getElementById ('gameCanvas');   //Get the canvas to draw the game onto
+  var ctx             = canvas.getContext ('2d');                 //Set the context to 2D graphics
+  var str             = '';
+  var powerMultiplier = 0; 
 
+  //********************************************
+  //| Load the sound items
   var snd_start     = AudioFX('sounds/8bit_ready_go',  { formats: ['wav', 'mp3', 'm4a'], volume: 0.1          });
   var snd_lose      = AudioFX('sounds/8bit_lose',      { formats: ['wav', 'mp3', 'm4a'], volume: 0.1          });
   var snd_win       = AudioFX('sounds/8bit_win',       { formats: ['wav', 'mp3', 'm4a'], volume: 0.1          });
   var snd_miss_ball = AudioFX('sounds/8bit_failure',   { formats: ['wav', 'mp3', 'm4a'], volume: 0.1          });
   var snd_bounce    = AudioFX('sounds/8bit_bounce',    { formats: ['wav', 'mp3', 'm4a'], volume: 0.1, pool: 20});
   var snd_power_up  = AudioFX('sounds/8bit_power_up',  { formats: ['wav', 'mp3', 'm4a'], volume: 0.1, pool: 10});
+  //********************************************
   
   //| The defined levels
   //| field 0 = level ID, first item in the array is not a level
@@ -116,7 +132,7 @@ $( document ).ready(function() {
                        ['0',  '', '0 is not a level'],
                        ['1',  'google',     '0000100000000'],
                        ['2',  'pastel',     '----0000030000040'],
-                       ['3',  'pastel',     '0301002300110-0204020010130-0121030040410-0204020030140-0302003100210'],
+                       ['3',  'pastel',     '0301002300110-0204020010000-0121030040410-0204020030140-0302003100210'],
                        ['4',  'microsoft',  '4321120344321-0000000000000-0100011000110-1100101101001-0100001000010-0100010001001-1110111100110-0000000000000-1234430211234'],
                        ['5',  'google',     '1010002344340-1011223443111-1421134121111-0424230023000-1414303421100-1111200131111-1131121304111'],
                        ['6',  'caucasian',  '0131231324332-1043204230234-1121312133244-0213123403242-1233012301123-0123240330303-0000000000000-1102310241324-3213241342432,1234242341100'],
@@ -141,6 +157,7 @@ $( document ).ready(function() {
   var bat          = null;    //Bat object, stores generic variables like; size, speed, width. Also give access to methodes like move left and move right
   var ball         = null;    //Ball object, stores generic variables like; size, speed, radius. Also give access to methodes
   var block        = [];      //Array of block objects,  stores generic variables like; color, x-pos, y-pos and status. Also give access to methodes
+  var powerup      = null; //[];
   //********************************************
 
   //********************************************
@@ -216,7 +233,7 @@ $( document ).ready(function() {
     //| New game object and initalize it
     //| It uses the variables in the Defaults-object
     game = new gameSettings();
-    game.init ('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft);
+    game.init ('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft, 0, 0);
 
     //New bat object and initalize it
     //| It uses the variables in the Defaults-object
@@ -227,8 +244,12 @@ $( document ).ready(function() {
     //| It uses the variables in the Defaults-object
     ball = new objectBall();
     ball.init (Defaults.ball.x, Defaults.ball.y, Defaults.ball.r, Defaults.ball.color, Defaults.ball.dx, Defaults.ball.dxMax, Defaults.ball.dy, 1);
-    //*******************************************************
     
+    //Init the power-ups
+    powerup = new objectPowerUp();
+    powerup.init (1, 0, 0, Defaults.powerup.r, Defaults.powerup.w, Defaults.powerup.h, Defaults.powerup.color, false);
+    //*******************************************************
+
     //Rest the bat and ball to their staring position    
     resetBatBall  ();
 
@@ -249,6 +270,7 @@ $( document ).ready(function() {
 
     getInput();                 //Get user input
     getCollision ();            //Get and process ball collision
+    getPowerUp();
 
     draw();                      //Function to draw all the elements that needs to be refresed every cycle
   }
@@ -305,25 +327,29 @@ $( document ).ready(function() {
     //Clear the canvas
     ctx.clearRect (0, 0, canvas.width, canvas.height);
 
-    if (game.state === 'play') {
-      drawText('', 290, 400);
+    switch (game.state) {
+      case 'run_ready' : drawCountDown();                                         break;
+      case 'play_ready': drawText('Press <SPACE> to start', 290, 400);            break;
+      case 'play'      : drawText('', 290, 400);                                  break;
+      case 'gameover'  : drawText('Press restart to restart the game', 240, 400); break;
     }
 
-    if (game.state === 'run_ready') {
-      drawCountDown();
+    //**************************************
+    //| Draw the powerup's
+    //| 1) circle > widen bat
+    //| 2) add a multiplier to the score
+    //| Only draw when 1 or 2 is draw and the powerup must be displayed (visible, yes)
+    if (((game.powerup === 1) || ((game.powerup === 2))) && (powerup.visible === true)) {
+      if (game.powerup === 1) {
+        powerup.drawCircle();   //Draw power-up: circle
+      } else {
+        powerup.drawCube();     //Draw power-up: cube
+      }
     }
+    //**************************************
 
-    if (game.state === 'play_ready') {
-      drawText('Press <SPACE> to start', 290, 400);
-    }
-
-    if (game.state === 'gameover') {
-      drawText('Press restart to restart the game', 240, 400);
-    }
-
-
-    ball.draw();    //Draw the bat
-    bat.draw();     //Draw the ball
+    ball.draw();      //Draw the bat
+    bat.draw();       //Draw the ball
 
     //Draw the blocks. They are stored in a array which needs to be checked.
     //In case the block is hit, the value will not be 'dead'. Only the alive values must be drawed
@@ -404,10 +430,54 @@ $( document ).ready(function() {
     }
   }
 
+
+
+  //********************************************
+  //| Power ups
+  //| 1) bat increased 100%
+  //| 2) score multiplier *1.5
+  function getPowerUp() {
+
+    if ((game.powerup >= 1) && (game.powerup <= 2) && (powerup.visible === true)) {
+
+      if (powerup.y > canvas.height) {
+        game.powerup       = 0;
+        game.powerupActive = 0;
+      }
+
+      if ((powerup.y > bat.y) && (powerup.x > bat.x) && (powerup.x < bat.x+bat.w)) {
+        powerup.visible = false;
+        powerup.x       = Defaults.powerup.x;
+        powerup.y       = Defaults.powerup.y;
+        game.powerupActive++;
+      } else {
+        powerup.y = powerup.y+Defaults.powerup.s;
+      }
+    }
+
+    if (game.powerupActive > 0) {
+      game.powerupActive++;
+
+      if (game.powerup === 1) {
+        bat.w = Defaults.bat.w * 1.5;
+      } else {
+        powerMultiplier = 2;
+      }
+    } 
+
+    if (game.powerupActive >= Defaults.powerup.time) {
+      game.powerup       = 0;
+      powerup.visible    = false;
+      game.powerupActive = 0;
+      bat.w              = Defaults.bat.w;
+
+    }
+  }
+  //********************************************
+
   //********************************************
   //| Collision and movement of the ball
   function getCollision() {
-    var scoreMultiplier;
 
     if (game.state === 'run') {
       //Doe stuiter-shit met the ball
@@ -499,7 +569,16 @@ $( document ).ready(function() {
         //if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
         if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
           playSound(snd_bounce);
-          scoreMultiplier = block[i].multiplier;
+
+          if (powerup.visible === false) {
+            game.powerup = Math.round((Math.random() * 5));
+          }
+
+          if ((game.powerup >= 1) && (game.powerup <= 2) && (powerup.visible === false)) {
+            powerup.visible = true;
+            powerup.x       = ball.x;
+            powerup.y       = ball.y+ball.r;
+          }
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
             //console.log ('Side');
@@ -521,7 +600,7 @@ $( document ).ready(function() {
           }
           block[i].visible = 'no';
           game.blocksLeft--;
-          game.score += 10*scoreMultiplier;
+          game.score = game.score + (10 * block[i].multiplier) + (game.powerup * powerMultiplier);
 
           if ((game.score > game.highscore) && (game.score > 0)) {
             game.highscore = game.score;
@@ -548,6 +627,8 @@ $( document ).ready(function() {
           game.level = 1;
         }
 
+        game.powerup = 0;
+
         //sleep (1000);
         loadLevel ();
         resetBatBall ();
@@ -555,7 +636,7 @@ $( document ).ready(function() {
         game.state = 'play_ready'; //ready_run
       }
     } else {
-       ball.changePosition (bat.x + 50, Defaults.ball.y);
+      ball.changePosition (bat.x + 50, Defaults.ball.y);
     }
   }
   //|End of function
@@ -599,14 +680,16 @@ $( document ).ready(function() {
   //| End of high-score-section
   //********************************************
 
-  function gameSettings(state, level, score, lives, blocks, blocksLeft) {
+  function gameSettings(state, level, score, lives, blocks, blocksLeft, powerup, powerupActive) {
 
-    this.state      = state;
-    this.level      = level;
-    this.score      = score;
-    this.lives      = lives;
-    this.blocks     = blocks;
-    this.blocksLeft = blocksLeft; 
+    this.state         = state;
+    this.level         = level;
+    this.score         = score;
+    this.lives         = lives;
+    this.blocks        = blocks;
+    this.blocksLeft    = blocksLeft; 
+    this.powerup       = powerup;
+    this.powerupActive = powerupActive;
 
     gameSettings.prototype.changeBlocks = function(blocks) {
       this.blocks = blocks;
@@ -620,35 +703,41 @@ $( document ).ready(function() {
       this.level = level;
     }
 
-    gameSettings.prototype.init = function(state, level, score, lives, blocks, blocksLeft) {
-      this.state = state;
-      this.level     = level;
-      this.score     = score;
-      this.lives     = lives;
-      this.blocks    = blocks;
-      this.blocksLeft = blocksLeft; 
+    gameSettings.prototype.changePowerUpActive = function(powerupActive) {
+      this.powerupActive = powerupActive;
+    }
+
+    gameSettings.prototype.init = function(state, level, score, lives, blocks, blocksLeft, powerup, powerupActive) {
+      this.state         = state;
+      this.level         = level;
+      this.score         = score;
+      this.lives         = lives;
+      this.blocks        = blocks;
+      this.blocksLeft    = blocksLeft; 
+      this.powerup       = powerup;
+      this.powerupActive = powerupActive;
     };
   } 
 
   //Object Ball
   function objectBall(x, y, r, color, dx, dxMax, dy){
 
-    this.x = x;
-    this.y = y;
-    this.r = r;
+    this.x     = x;
+    this.y     = y;
+    this.r     = r;
     this.color = color
-    this.dx = dx;
+    this.dx    = dx;
     this.dxMax = dxMax;
-    this.dy = dy;
+    this.dy    = dy;
 
     objectBall.prototype.init = function(x, y, r, color, dx, dxMax, dy) {
-      this.x = x;
-      this.y = y;
-      this.r = r;
+      this.x     = x;
+      this.y     = y;
+      this.r     = r;
       this.color = color;
-      this.dx = dx;
+      this.dx    = dx;
       this.dxMax = dxMax;
-      this.dy = dy;
+      this.dy    = dy;
     };
 
     objectBall.prototype.changePosition = function(x, y) {
@@ -693,13 +782,13 @@ $( document ).ready(function() {
     this.fill        = fillColor;
 
     objectBat.prototype.init = function(x, y, w, h, s, borderColor, fillColor) {
-      this.x = x;
-      this.y = y;
-      this.w = w;
-      this.h = h;
-      this.s = s;
+      this.x      = x;
+      this.y      = y;
+      this.w      = w;
+      this.h      = h;
+      this.s      = s;
       this.border = borderColor;
-      this.fill = fillColor;
+      this.fill   = fillColor;
     };
 
     objectBat.prototype.changeWidth = function(w) {
@@ -784,6 +873,55 @@ $( document ).ready(function() {
    
   };
 
+  function objectPowerUp(type, x, y, r, w, h, color, visble) {
+    this.type    = type;
+    this.x       = x;
+    this.y       = y;
+    this.r       = r;
+    this.w       = w,
+    this.h       = h,
+    this.color   = color
+    this.visible = visble;
+
+    objectPowerUp.prototype.init = function(type, x, y, r, w, h, color, visble) {
+      this.type   = type;
+      this.x      = x;
+      this.y      = y;
+      this.r      = r;
+      this.w      = w;
+      this.h      = h;
+      this.color  = color;
+      this.visble = visble;
+    };
+
+    objectPowerUp.prototype.changeX = function(x) {
+      this.x = y;
+    };
+
+    objectPowerUp.prototype.changeY = function(y) {
+      this.y = y;
+    };
+
+    objectPowerUp.prototype.drawCircle = function() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+      ctx.closePath();
+    };
+
+    objectPowerUp.prototype.drawCube = function() {
+      ctx.beginPath ();
+      ctx.rect (this.x, this.y, this.w, this.h);
+      ctx.fillStyle = this.color;
+      ctx.fill ();
+      ctx.lineWidth  = 1;
+      ctx.strokeStyle = this.color;
+      ctx.stroke ();
+    };
+
+  };
+
   //Create key-object
   var Key = {
     _pressed: {},
@@ -813,11 +951,16 @@ $( document ).ready(function() {
   };
 
   function resetBatBall() {
-    ball.dx = Defaults.ball.dx;
-    ball.dy = Defaults.ball.dy;
-    bat.x   = Defaults.bat.x;
-    bat.y   = Defaults.bat.y;
-    bat.w   = Defaults.bat.w;    
+    powerup.x          = Defaults.powerup.x;
+    powerup.y          = Defaults.powerup.y;
+    powerup.visible    = false;
+    game.powerup       = 0;
+    game.powerupActive = 0;
+    ball.dx            = Defaults.ball.dx;
+    ball.dy            = Defaults.ball.dy;
+    bat.x              = Defaults.bat.x;
+    bat.y              = Defaults.bat.y;
+    bat.w              = Defaults.bat.w;    
     ball.changePosition (Defaults.ball.x, Defaults.ball.y);
   }
 
@@ -853,15 +996,20 @@ $( document ).ready(function() {
   function drawDebugInformation() {
     $('#debug').show ();
 
-    $('#fps').text    (Math.round(Defaults.game.interval / Defaults.game.fps));
-    $('#state').text  (game.state);
-    $('#batx').text   (Math.round(bat.x));
-    $('#baty').text   (Math.round(bat.y));
-    $('#ballx').text  (Math.round(ball.x));
-    $('#ballxs').text (Math.round(ball.dx));
-    $('#bally').text  (Math.round(ball.y));
-    $('#ballys').text (Math.round(ball.dy));
-    $('#total').text  (game.blocks);
-    $('#left').text   (game.blocksLeft);
+    $('#fps').text      (Math.round(Defaults.game.interval / Defaults.game.fps));
+    $('#state').text    (game.state);
+    $('#batx').text     (Math.round(bat.x));
+    $('#baty').text     (Math.round(bat.y));
+    $('#ballx').text    (Math.round(ball.x));
+    $('#ballxs').text   (Math.round(ball.dx));
+    $('#bally').text    (Math.round(ball.y));
+    $('#ballys').text   (Math.round(ball.dy));
+    $('#total').text    (game.blocks);
+    $('#left').text     (game.blocksLeft);
+    $('#power').text    (game.powerup);
+    $('#pvisible').text (powerup.visible);
+    $('#cycles').text   (game.powerupActive);
+    $('#powerx').text   (Math.round(powerup.x));
+    $('#powery').text   (Math.round(powerup.y));
   }
 });
