@@ -31,6 +31,9 @@ https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
 ! http://saribe.github.io/eModal/#                          (model window)
 ! https://github.com/jakesgordon/javascript-audio-fx        (sound library)
 ! https://www.freesound.org/pe                              (sounds)
+! https://lokesh-coder.github.io/pretty-checkbox/           (nice checkboxes)
+! http://www.softicons.com/toolbar-icons/mono-general-icons-4-by-custom-icon-design/sound-icon      (icons for sound)
+! http://www.softicons.com/toolbar-icons/mono-general-icons-4-by-custom-icon-design/sound-off-icon  (icons for sound)
 
 Help for collision detection 
 ? https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection

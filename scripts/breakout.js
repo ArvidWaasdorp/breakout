@@ -388,7 +388,7 @@ $( document ).ready(function() {
     //Input here :D
     if (Key.isDown(Key.SPACE) && (game.state === 'play'))   {
       game.state = 'ready_run';
-      snd_start.play();
+      playSound(snd_start);
     }
   }
 
@@ -400,7 +400,7 @@ $( document ).ready(function() {
       //Doe stuiter-shit met the ball
       if (ball.x + ball.dx > canvas.width-ball.r || ball.x + ball.dx < ball.r) {
           ball.dx = -ball.dx;
-          snd_bounce.play();
+          playSound(snd_bounce);
       }
 
       if (ball.y + ball.dy > canvas.height-ball.r || ball.y + ball.dy < ball.r) {
@@ -417,7 +417,7 @@ $( document ).ready(function() {
             var strHighScore = '';
 
             game.state = 'gameover';
-            snd_lose.play();
+            playSound(snd_bounce);
 
             if ((game.score >= game.highscore) && (game.score > 0)) {
               strHighScore = '<br><br><strong>GREAT! You have the beaten the highscore!</strong>';
@@ -437,19 +437,17 @@ $( document ).ready(function() {
             $('#game-start').text(' Restart ');
             $('#pauze-game').prop('disabled', true);
           } else {
-          snd_miss_ball.play();
-
+            playSound(snd_miss_ball);
           }
         } else {
-          snd_bounce.play();
+          playSound(snd_bounce);
         }
       }
 
       //Collision of the bat
       if (((ball.x+ball.r/2 >= bat.x) && (ball.x-ball.r/2 <= bat.x+bat.w)) && ((ball.y+ball.r/2 >= bat.y) && (ball.y-ball.r/2 <= bat.y+bat.h))) {
         var posBallBat = ball.x - bat.x;
-          snd_bounce.play();
-
+          playSound(snd_bounce);
 
         if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)) && ((ball.y >= bat.y) && (ball.y <= bat.y+bat.h))) {
           //console.log ('Side');
@@ -480,7 +478,6 @@ $( document ).ready(function() {
             ball.dy = -ball.dy;
           }
         }
-
       }
 
       //Collision of the blocks
@@ -488,7 +485,7 @@ $( document ).ready(function() {
 
         //if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
         if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
-          snd_bounce.play();
+          playSound(snd_bounce);
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
             //console.log ('Side');
@@ -498,7 +495,7 @@ $( document ).ready(function() {
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)))  {
             if (ball.y <= block[i].y) {
-              console.log ('Top');
+              //console.log ('Top');
               ball.dx = +ball.dx;
               ball.dy = -ball.dy;
             } 
@@ -526,7 +523,7 @@ $( document ).ready(function() {
       if (game.blocksLeft === 0) {
  
         sleep (10 );
-        snd_win.play();
+        playSound(snd_win);
 
         if (game.lives <= 5) {
           game.lives++;
@@ -545,6 +542,13 @@ $( document ).ready(function() {
   }
   //|End of function
   //********************************************
+
+  //Play sound, but only when the icon is checked
+  function playSound (sound) {
+    if ($('#sound').is(':checked') === true) {
+        sound.play();
+    }
+  }
 
   //********************************************
   //| Use cookies to set the highscore

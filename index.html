@@ -20,10 +20,6 @@
   </head>
   <body>
 
-    <div>
-      <img src="images/speaker.png" alt="sound on/off">
-    </div>
-
     <div class="container">
       <div class="row">
         <div class="col-md-12 text-center">
@@ -35,7 +31,11 @@
           <canvas id="gameCanvas" width="800" height="600"></canvas>
         </div>
         <div class="col-md-2 score-wrapper">
-
+          <div class="row score-level">
+          <div class="row score-level">
+            <input type='checkbox' name='sound' value='valuable' id="sound" checked><label for="sound"></label>
+          </div> 
+          </div>
           <div class="row score-level">
             <h2>High score</h2>
             <p><span id="hscore">1</span></p>
