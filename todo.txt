@@ -21,19 +21,19 @@ Change speed of ball          reject ? Do I want this? > (26 Oct) No, the angle 
 Add power-ups                 open   
 Launch game on [space]        done   Simple implementation, see B2 > (26 Oct) Solved by adding a button that stops the game loop and restart it again
 Add lives                     done   Simple implementation, game stops nothing happends > (26 Oct) Added max lives and min lives.
-Sounds                        open   
+Sounds                        done   (28 Oct) Implemented sound using external library. Sounds via freesound.org
 
 Usefull links:
+--------------------
 http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-with-javascript-jquery
 https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
 ! https://github.com/jakesgordon/javascript-breakout
 ! http://saribe.github.io/eModal/#                          (model window)
+! https://github.com/jakesgordon/javascript-audio-fx        (sound library)
+! https://www.freesound.org/pe                              (sounds)
 
 Help for collision detection 
 ? https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
-
-
-
 
 
 Improve speed

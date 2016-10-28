@@ -92,17 +92,24 @@ $( document ).ready(function() {
 
   //********************************************
   //| Global variables used in the game
-  var canvas    = document.getElementById ('gameCanvas');   //Get the canvas to draw the game onto
-  var ctx       = canvas.getContext ('2d');                 //Set the context to 2D graphics
-  var str       = "";
+  var canvas        = document.getElementById ('gameCanvas');   //Get the canvas to draw the game onto
+  var ctx           = canvas.getContext ('2d');                 //Set the context to 2D graphics
+  var str           = '';
 
+  var snd_start     = AudioFX('sounds/8bit_ready_go',  { formats: ['wav', 'mp3', 'm4a'], volume: 0.1          });
+  var snd_lose      = AudioFX('sounds/8bit_lose',      { formats: ['wav', 'mp3', 'm4a'], volume: 0.1          });
+  var snd_win       = AudioFX('sounds/8bit_win',       { formats: ['wav', 'mp3', 'm4a'], volume: 0.1          });
+  var snd_miss_ball = AudioFX('sounds/8bit_failure',   { formats: ['wav', 'mp3', 'm4a'], volume: 0.1          });
+  var snd_bounce    = AudioFX('sounds/8bit_bounce',    { formats: ['wav', 'mp3', 'm4a'], volume: 0.1, pool: 20});
+  var snd_power_up  = AudioFX('sounds/8bit_power_up',  { formats: ['wav', 'mp3', 'm4a'], volume: 0.1, pool: 10});
+  
   //| The defined levels
   //| field 0 = level ID, first item in the array is not a level
   //| field 1 = layout, what color scheme to be used
   //| field 2 = the level
   //|            0) no block 
   //|            1 till 4) scheme colors
-  //|            4) Scheme 4
+  //|            4) Scheme color nr: 4
   //|            -) Next line
   // Level, starts on 10, length = 60 (makes is a bit easier)  
   var levels       = [
@@ -323,15 +330,13 @@ $( document ).ready(function() {
     ctx.fillText (text, x, y);
   }
 
-
-  var strCount = [['Ready..'], ['Set...'],['Go!!!']];
+  var strCount = [['Three...'], ['Two..'], ['One.'], ['Go!!!']];
   var count  = 0;
   var count1 = 0;
-
   function drawCountDown() {
 
-    if (count < 181) {
-      if ((count === 60) || (count === 120) || (count === 180)) {
+    if (count < 121) {
+      if ((count === 40) || (count === 80) || (count === 120)) {
         count1++;
       }
     }
@@ -341,7 +346,7 @@ $( document ).ready(function() {
     ctx.fillText (strCount[count1] || '', 350, 400);
     count++;
 
-    if (count === 181) {
+    if (count === 121) {
       game.state = 'run';
       count = 0;
       count1 = 0;
@@ -383,6 +388,7 @@ $( document ).ready(function() {
     //Input here :D
     if (Key.isDown(Key.SPACE) && (game.state === 'play'))   {
       game.state = 'ready_run';
+      snd_start.play();
     }
   }
 
@@ -394,47 +400,56 @@ $( document ).ready(function() {
       //Doe stuiter-shit met the ball
       if (ball.x + ball.dx > canvas.width-ball.r || ball.x + ball.dx < ball.r) {
           ball.dx = -ball.dx;
+          snd_bounce.play();
       }
 
       if (ball.y + ball.dy > canvas.height-ball.r || ball.y + ball.dy < ball.r) {
-          ball.dy = -ball.dy;
+        ball.dy = -ball.dy;
 
-          if (ball.dy < 0) {
-            game.lives--;
-            
-            //Resetting ball and bat
-            game.state = 'play';  //ready_run
-            resetBatBall();
+        if (ball.dy < 0) {
+          game.lives--;
+          
+          //Resetting ball and bat
+          game.state = 'play';  //ready_run
+          resetBatBall();
 
-            if (game.lives === 0) {
-              game.state = 'gameover';
+          if (game.lives === 0) {
+            var strHighScore = '';
 
-              var strHighScore = '';
+            game.state = 'gameover';
+            snd_lose.play();
 
-              if ((game.score >= game.highscore) && (game.score > 0)) {
-                strHighScore = '<br><br><strong>GREAT! You have the beaten the highscore!</strong>';
-                setCookie ('BO_highscore', game.score, 7);
-              }
-
-              var options = {
-                message: 'Game over, your score is: <strong>' + game.score + '</strong>.' + strHighScore + '<br><br>Press restart to go again',
-                title: 'GAME OVER',
-                useBin: true
-              };
-
-              eModal.alert(options);
-
-              $('#game-stop').hide();
-              $('#game-start').show();
-              $('#game-start').text(' Restart ');
-              $('#pauze-game').prop('disabled', true);
+            if ((game.score >= game.highscore) && (game.score > 0)) {
+              strHighScore = '<br><br><strong>GREAT! You have the beaten the highscore!</strong>';
+              setCookie ('BO_highscore', game.score, 7);
             }
+
+            var options = {
+              message: 'Game over, your score is: <strong>' + game.score + '</strong>.' + strHighScore + '<br><br>Press restart to go again',
+              title: 'GAME OVER',
+              useBin: true
+            };
+
+            eModal.alert(options);
+
+            $('#game-stop').hide();
+            $('#game-start').show();
+            $('#game-start').text(' Restart ');
+            $('#pauze-game').prop('disabled', true);
+          } else {
+          snd_miss_ball.play();
+
           }
+        } else {
+          snd_bounce.play();
+        }
       }
 
       //Collision of the bat
       if (((ball.x+ball.r/2 >= bat.x) && (ball.x-ball.r/2 <= bat.x+bat.w)) && ((ball.y+ball.r/2 >= bat.y) && (ball.y-ball.r/2 <= bat.y+bat.h))) {
         var posBallBat = ball.x - bat.x;
+          snd_bounce.play();
+
 
         if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)) && ((ball.y >= bat.y) && (ball.y <= bat.y+bat.h))) {
           //console.log ('Side');
@@ -473,6 +488,7 @@ $( document ).ready(function() {
 
         //if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
         if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
+          snd_bounce.play();
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
             //console.log ('Side');
@@ -509,12 +525,15 @@ $( document ).ready(function() {
       //You have won the level!!!!
       if (game.blocksLeft === 0) {
  
+        sleep (10 );
+        snd_win.play();
+
         if (game.lives <= 5) {
           game.lives++;
         }
         game.level++;
 
-        sleep (1000);
+        //sleep (1000);
         loadLevel ();
         resetBatBall ();
 
