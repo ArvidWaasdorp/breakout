@@ -18,7 +18,7 @@ Create levels                 done   Must load correctly > (26 Oct) Load new lev
 Create text                   done   (26 Oct) Added text and countdown function   
 Change angle > hit on site    done   
 Change speed of ball          reject ? Do I want this? > (26 Oct) No, the angle will increase the difficulty and speed
-Add power-ups                 open   
+Add power-ups                 done   (28 Oct) Implemented 2 power-ups   
 Launch game on [space]        done   Simple implementation, see B2 > (26 Oct) Solved by adding a button that stops the game loop and restart it again
 Add lives                     done   Simple implementation, game stops nothing happends > (26 Oct) Added max lives and min lives.
 Sounds                        done   (28 Oct) Implemented sound using external library. Sounds via freesound.org
@@ -46,3 +46,4 @@ https://developer.mozilla.org/nl/docs/Web/API/Canvas_API/Tutorial/Optimizing_can
 
 open -        - B1) BUG dat bal door de blokken gaat. Gebeurt nu vooral wanneer de bal van rechts boven naar links gaat!!!! 
 done - 26 Oct - B2) Space hangs :(, difficult to pauze and start the game again
+open -        - B3) Some times the power-up changes... or is gone....

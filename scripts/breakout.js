@@ -20,10 +20,10 @@ var Defaults = {
     x    : 400,
     y    : 490,
     r    : 7,
-    color: '#d9534f',
-    dx   : 0.5,  //3
-    dxMax: 1,  //8
-    dy   : -2, //-7
+    color: '#854442',
+    dx   : 3,  //3 //0.5
+    dxMax: 7,  //8 //1
+    dy   : -7, //-7 //-2
   },
 
   bat: {
@@ -32,8 +32,8 @@ var Defaults = {
     w          : 100,
     h          : 10,
     s          : 8, //5
-    borderColor: '#428bca',
-    fillColor  : '#5bc0de',
+    borderColor: '#854442',
+    fillColor  : '#be9b7b',
   },
 
   powerup: {
@@ -43,7 +43,7 @@ var Defaults = {
     w          : 15,
     h          : 15,
     s          : 3, //6
-    color      : 'yellow',
+    color      : '#4b3832',
     time       : 240,       //amount of cycles the powerup is active. 16*15seconds
   },
 
@@ -410,11 +410,12 @@ $( document ).ready(function() {
       $('#pauze-game').prop ('disabled', true);
     }
 
-    drawDebugInformation ();                    //Show debug information
+    //drawDebugInformation ();                    //Show debug information
   }
-  //| End of function
   //********************************************
 
+  //********************************************
+  //| Get the keyboard input and process it
   function getInput() {
 
     if ((game.state === 'play') || (game.state === 'run_ready') || (game.state === 'play_ready')  || game.state === 'run') {
@@ -429,8 +430,7 @@ $( document ).ready(function() {
       playSound (snd_start);
     }
   }
-
-
+  //********************************************
 
   //********************************************
   //| Power ups
@@ -639,7 +639,6 @@ $( document ).ready(function() {
       ball.changePosition (bat.x + 50, Defaults.ball.y);
     }
   }
-  //|End of function
   //********************************************
 
   //Play sound, but only when the icon is checked
@@ -677,9 +676,13 @@ $( document ).ready(function() {
   function eraseCookie(name) {
     createCookie (name,'',-1);
   }
-  //| End of high-score-section
   //********************************************
 
+  //********************************************
+  //| Definition of the game object
+  //| An object has variables and functions (methods)
+  //| 
+  //| Object to store all the game variables
   function gameSettings(state, level, score, lives, blocks, blocksLeft, powerup, powerupActive) {
 
     this.state         = state;
@@ -719,7 +722,7 @@ $( document ).ready(function() {
     };
   } 
 
-  //Object Ball
+  //| Object to store all the ball variables
   function objectBall(x, y, r, color, dx, dxMax, dy){
 
     this.x     = x;
@@ -770,7 +773,7 @@ $( document ).ready(function() {
     };
   };
 
-  //Object Bat
+  //| Object to store all the bat variables
   function objectBat(x, y, w, h, s, borderColor, fillColor) {
 
     this.x           = x;
@@ -835,7 +838,8 @@ $( document ).ready(function() {
    
   };
 
-  //Object Blocks
+  //| Object to store all the block variables
+  //| Blocks are an array for this game
   function objectBlock(x, y, w, h, borderColor, fillColor, visible, multiplier) {
     this.x          = x;
     this.y          = y;
@@ -873,6 +877,7 @@ $( document ).ready(function() {
    
   };
 
+  //| Object to store all the powerup variables and methods
   function objectPowerUp(type, x, y, r, w, h, color, visble) {
     this.type    = type;
     this.x       = x;
@@ -892,14 +897,6 @@ $( document ).ready(function() {
       this.h      = h;
       this.color  = color;
       this.visble = visble;
-    };
-
-    objectPowerUp.prototype.changeX = function(x) {
-      this.x = y;
-    };
-
-    objectPowerUp.prototype.changeY = function(y) {
-      this.y = y;
     };
 
     objectPowerUp.prototype.drawCircle = function() {

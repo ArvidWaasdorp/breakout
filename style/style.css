@@ -13,23 +13,27 @@ h1 {
   text-transform: uppercase;
   font-size: 50px;
   margin: 0;
+
+  background: -webkit-linear-gradient(#3c2f2f, #fff4e6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 #gameCanvas {
   margin-top: 5px; 
 
-  border-top: 1px solid #25545b;
-  border-left: 1px solid #25545b;
-  border-right: 1px solid #25545b;
+  border-top: 1px solid #3c2f2f;
+  border-left: 1px solid #3c2f2f;
+  border-right: 1px solid #3c2f2f;
 
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
 
-  background: #75a8ae;                                  /* For browsers that do not support gradients */
-  background: -webkit-linear-gradient(#75a8ae, #FFF); /* For Safari 5.1 to 6.0 */
-  background: -o-linear-gradient(#75a8ae,  #FFF);     /* For Opera 11.1 to 12.0 */
-  background: -moz-linear-gradient(#75a8ae, #FFF);    /* For Firefox 3.6 to 15 */
-  background: linear-gradient(#75a8ae, #FFF);         /* Standard syntax */
+  background: #fff4e6;                                  /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(#fff4e6, #FFF); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#fff4e6,  #FFF);     /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#fff4e6, #FFF);    /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#fff4e6, #FFF);         /* Standard syntax */
 }
 
 .score-wrapper {
@@ -39,12 +43,12 @@ h1 {
 
 .score-wrapper h2 {
   font-family: FREEDOM;
-  font-size: 28 px;
+  font-size: 22px;
 }
 
 .score-wrapper p {
-  border: 1px solid #25545b;
-  background: #e2fcff;
+  border: 1px solid #4b3832;
+  background: #fff4e6;
   margin: 0;
   padding: 0;
   margin-bottom: 10px;
@@ -59,23 +63,23 @@ h1 {
 }
 
 .col-md-2 {
-  border: 1px solid #25545b;
-  background: #75a8ae;
+  border: 1px solid #3c2f2f;
+  background: #be9b7b;
   margin-top: 5px;
   margin-bottom: 0;
 }
 
 #pauze-game, #game-start, #game-stop {
   font-family: FREEDOM;
-  background: #e2fcff;
+  background: #854442;
   font-size: 16px;
   width: 144px;
   padding-top: 7px;
   padding-bottom: 7px;
   margin-bottom: 20px;
 
-  border: 1px solid #25545b;
-  color: #000;
+  border: 1px solid #3c2f2f;
+  color: #be9b7b;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -83,12 +87,12 @@ h1 {
 }
 
 #pauze-game:hover, #game-start:hover, #game-stop:hover {
-  background: #f8f9e9;
+  background: #fff4e6;
 }
 
 #pauze-game:disabled {
   color: #dddddd;
-  background: #f8f9e9;
+  background: #fff4e6;
 }
 
 .lives {
