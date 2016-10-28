@@ -13,7 +13,7 @@ Create blocks                 done
 Remove blocks                 done   
 Create collision on blocks    done   Not briljant, but it works !!!Note see bugs!!!  
 Create score                  done   Simple implementation > (26 oct) Improved score and add high score via Cookies
-Create menu                   open   
+Create menu                   done   (28 Oct) Implementation using buttons   
 Create levels                 done   Must load correctly > (26 Oct) Load new level, increase amount of lives, reset the correct settings 
 Create text                   done   (26 Oct) Added text and countdown function   
 Change angle > hit on site    done   
@@ -21,15 +21,20 @@ Change speed of ball          reject ? Do I want this? > (26 Oct) No, the angle 
 Add power-ups                 open   
 Launch game on [space]        done   Simple implementation, see B2 > (26 Oct) Solved by adding a button that stops the game loop and restart it again
 Add lives                     done   Simple implementation, game stops nothing happends > (26 Oct) Added max lives and min lives.
+Sounds                        open   
 
 Usefull links:
 http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-with-javascript-jquery
 https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
 ! https://github.com/jakesgordon/javascript-breakout
-
+! http://saribe.github.io/eModal/#                          (model window)
 
 Help for collision detection 
 ? https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+
+
+
+
 
 Improve speed
 https://www.google.nl/search?q=this.pressed+slows+browser&oq=this.pressed+slows+browser&aqs=chrome..69i57.5912j0j4&sourceid=chrome&ie=UTF-8#q=canvas+draw+performance

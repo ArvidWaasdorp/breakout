@@ -14,8 +14,8 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
     <script src="scripts/jquery-2.2.4.min.js"></script>
     <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/eModal.min.js"></script>
     <script src="scripts/breakout.js"></script>
-
   </head>
   <body>
 
@@ -47,13 +47,12 @@
           <div class="row score-lives">
             <h2>Lives</h2>
             <span id="lives">
-              <img class="lives" id="live1" src="images/live_full.png" alt="Breakout live full">
-              <img class="lives" id="live2" src="images/live_full.png" alt="Breakout live full">
-              <img class="lives" id="live3" src="images/live_full.png" alt="Breakout live full">
-              <img class="lives" id="live4" src="images/live_full.png" alt="Breakout live full">
-              <img class="lives" id="live5" src="images/live_full.png" alt="Breakout live full">
+              <img class="lives" id="live1" src="images/live_empty.png" alt="Breakout live full">
+              <img class="lives" id="live2" src="images/live_empty.png" alt="Breakout live full">
+              <img class="lives" id="live3" src="images/live_empty.png" alt="Breakout live full">
+              <img class="lives" id="live4" src="images/live_empty.png" alt="Breakout live full">
+              <img class="lives" id="live5" src="images/live_empty.png" alt="Breakout live full">
             </span>
-            <!--<p><span id="lives">0</span></p>-->
           </div>
 
           <div class="row">
@@ -69,7 +68,7 @@
             <button id="pauze-game" disabled> Pauze </button>
           </div>
 
-          <div class="row debug">
+          <div class="row debug" id="debug">
             <h3>Debug</h2>
             Interval (ms): <span id="fps"></span>
             <br>State: <span id="state"></span>
@@ -82,6 +81,5 @@
         </div>
       </div>
     </div>
-
   </body>
 </html>

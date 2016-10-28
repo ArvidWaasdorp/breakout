@@ -8,7 +8,7 @@ var Defaults = {
     handle    : null,
     level     : 1,
     score     : 0,
-    lives     : 3,
+    lives     : 1,
     livesMax  : 5,
     blocks    : 0,
     blocksLeft: 0,
@@ -90,7 +90,7 @@ var layouts = {
 
 $( document ).ready(function() {
 
-  //**************************************************
+  //********************************************
   //| Global variables used in the game
   var canvas    = document.getElementById ('gameCanvas');   //Get the canvas to draw the game onto
   var ctx       = canvas.getContext ('2d');                 //Set the context to 2D graphics
@@ -107,14 +107,17 @@ $( document ).ready(function() {
   // Level, starts on 10, length = 60 (makes is a bit easier)  
   var levels       = [
                        ['0', '', '0 is not a level'],
-                       ['1', 'google',     '0000100000000-0000000000000-0000000000000-0000000000000-0000000000000-0000000000000-0000000000000'],
-                       ['2', 'google',     '1010002344340-1011223443111-1421134121111-0424230023000-1414303421100-1111200131111-1131121304111'],
-                       ['3', 'microsoft',  '1214334423411-4242242141312-2231434500214-1041313542043-1313144431321-1141114212333-1232113100213'],
-                       ['4', 'facebook',   '1010132432230-0231332411100-1341234231431-3123012031044-0313310330312-0323012312130-0412442424212'],
-                       ['5', 'caucasian',  '1232123442311-2324123141312-5243113250234-1041434134231-1313214301321-1143342412333-1243213121355'],
-                       ['6', 'pastel',     '1422233244131-1322423124112-4541412502034-2034134324201-4231323414341-4131144212333-4143310254523'],
+                       ['1', 'google',     '0000100000000'],
+                       ['2', 'pastel',     '----0000030000040'],
+                       ['3', 'pastel',     '0301002300110-0204020010130-0121030040410-0204020030140-0302003100210'],
+                       ['4', 'microsoft',  '4321120344321-0000000000000-0100011000110-1100101101001-0100001000010-0100010001001-1110111100110-0000000000000-1234430211234'],
+                       ['5', 'google',     '1010002344340-1011223443111-1421134121111-0424230023000-1414303421100-1111200131111-1131121304111'],
+                       ['6', 'microsoft',  '1214334423411-4242242141312-2231434500214-1041313542043-1313144431321-1141114212333-1232113100213'],
+                       ['7', 'facebook',   '1010132432230-0231332411100-1341234231431-3123012031044-0313310330312-0323012312130-0412442424212'],
+                       ['8', 'caucasian',  '1232123442311-2324123141312-5243113250234-1041434134231-1313214301321-1143342412333-1243213121355'],
+                       ['9', 'pastel',     '1422233244131-1322423124112-4541412502034-2034134324201-4231323414341-4131144212333-4143310254523'],
                      ];
- 
+     
   // Level, starts on 0, length = 40  
   // var levels       = [
   //                      ['0', '', '0 is not a level'],
@@ -130,33 +133,46 @@ $( document ).ready(function() {
   var bat          = null;    //Bat object, stores generic variables like; size, speed, width. Also give access to methodes like move left and move right
   var ball         = null;    //Ball object, stores generic variables like; size, speed, radius. Also give access to methodes
   var block        = [];      //Array of block objects,  stores generic variables like; color, x-pos, y-pos and status. Also give access to methodes
-  //**************************************************
+  //********************************************
 
-  //**************************************************
-  //| Current implementation of starting and stopping the game
+  //********************************************
+  //| Current implementation of starting stopping or pauzing the game
+  //| Start the game
   $('#game-start').click(function(){
-    $('#game-start').hide();
-    $('#game-stop').show();
-    startLoop();
+
+    if (game.state === 'gameover') {
+      restartGame();
+    }// else {
+      $('#game-start').hide();
+      $('#game-stop').show();
+      startLoop();
+    //}
   });
 
+  //Stop the game. If you press stop a confirm button is displayed to confirm your choice. Based on that solution, the game will continue or is resetted
   $('#game-stop').click(function(){
-    $('#game-stop').hide();
-    $('#game-start').show();
     stopLoop();
+
+    var options = {
+            message: 'Do you really want to quite? <br><br> I am sure you will beat the game! Common just one more level... you will be amazed!',
+            title:   ':( You leaving already ?',
+            size: eModal.size.s,
+            label: "Yes"
+      };
+
+      eModal.confirm(options).then(function(){
+        $('#game-stop').hide();
+        $('#game-start').show();
+        $('#game-start').text(' Restart ');
+        $('#pauze-game').prop('disabled', true);
+
+        restartGame();
+
+      }, function() {
+        startLoop();
+      });
   });
 
-
-
-
-  // $('#stop').click(function(){
-  //   stopLoop();
-  // });
-  //| Current implementation of starting and stopping the game
-  //**************************************************
-
-  //**************************************************
-  //| Set the game on pauze
   //| Check the status and based on that the game will be paused.
   //| Also the text on the button will changed
   $('#pauze-game').click(function(){
@@ -168,16 +184,14 @@ $( document ).ready(function() {
       $('#pauze-game').text(' Pauze ');
     }
   });
-  //**************************************************
+  //********************************************
 
-  //Init the game. Set default values
+  //Open function: init. It set default values
   init();
 
   //********************************************
   //| The game loop
   function run() {
-
-    debug();                    //Show debug information
 
     getInput();                 //Get user input
     getCollision ();            //Get and process ball collision
@@ -214,7 +228,7 @@ $( document ).ready(function() {
     //*******************************************************
     
     //Rest the bat and ball to their staring position    
-    resetGame();
+    resetBatBall  ();
 
     //Retrieve the highscore of the user stored in a cookie
     game.highscore = getCookie('BO_highscore') || 0; 
@@ -239,8 +253,6 @@ $( document ).ready(function() {
     var b3 = layouts[levels[game.level][1]].block3;
     var b4 = layouts[levels[game.level][1]].block4;
     var fc = '#FFFFFF';
-
-    sleep (1000);
 
     for (i=0; i<strLevel.length; i++) {
 
@@ -278,11 +290,18 @@ $( document ).ready(function() {
     //Clear the canvas
     ctx.clearRect (0, 0, canvas.width, canvas.height);
 
-//    console.log ('loop'); 
-
     if (game.state === 'ready_run') {
       drawCountDown();
     }
+
+    if (game.state === 'gameover') {
+      drawText('Press restart to restart the game', 240, 400);
+    }
+
+    if (game.state === 'play') {
+      drawText('Press <SPACE> to start', 290, 400);
+    }
+
 
     ball.draw();    //Draw the bat
     bat.draw();     //Draw the ball
@@ -298,6 +317,13 @@ $( document ).ready(function() {
     updateUI();
   }
 
+  function drawText(text, x, y) {
+    ctx.font = '20px verdana';
+    ctx.fillStyle = 'red';
+    ctx.fillText (text, x, y);
+  }
+
+
   var strCount = [['Ready..'], ['Set...'],['Go!!!']];
   var count  = 0;
   var count1 = 0;
@@ -310,9 +336,9 @@ $( document ).ready(function() {
       }
     }
 
-    ctx.font = "26px verdana";
-    ctx.fillStyle = "red";
-    ctx.fillText (strCount[count1] || "", 350, 400);
+    ctx.font = '26px verdana';
+    ctx.fillStyle = 'red';
+    ctx.fillText (strCount[count1] || '', 350, 400);
     count++;
 
     if (count === 181) {
@@ -322,7 +348,7 @@ $( document ).ready(function() {
     }
   }
   
-  //**********************************************************
+  //********************************************
   //| Draw the UI components that needs to be refreshed every frame
   function updateUI() { 
     $('#hscore').text (game.highscore);   //Display the highscore of the game. The score is stored in a cookie
@@ -336,13 +362,15 @@ $( document ).ready(function() {
     }    
 
     if (game.state === 'run') {
-       $('#pauze-game').prop('disabled', false);
+      $('#pauze-game').prop('disabled', false);
     } else {
       $('#pauze-game').prop('disabled', true);
     }
+
+    //drawDebugInformation();                    //Show debug information
   }
   //| End of function
-  //**********************************************************
+  //********************************************
 
   function getInput() {
 
@@ -358,22 +386,8 @@ $( document ).ready(function() {
     }
   }
 
-  function resetGame() {
-    ball.dx = Defaults.ball.dx;
-    ball.dy = Defaults.ball.dy;
-    bat.x   = Defaults.bat.x;
-    bat.y   = Defaults.bat.y;
-    bat.w   = Defaults.bat.w;    
-    ball.changePosition (Defaults.ball.x, Defaults.ball.y);
-  }
-
-  function restartGame() {
-    resetGame();
-    game.lives = 3;
-    game.score = 0;
-    game.state = 'play';
-  }
-
+  //********************************************
+  //| Collision and movement of the ball
   function getCollision() {
 
     if (game.state === 'run') {
@@ -390,15 +404,30 @@ $( document ).ready(function() {
             
             //Resetting ball and bat
             game.state = 'play';  //ready_run
-            resetGame();
+            resetBatBall();
 
             if (game.lives === 0) {
               game.state = 'gameover';
 
-              if (game.score > game.highscore) {
+              var strHighScore = '';
+
+              if ((game.score >= game.highscore) && (game.score > 0)) {
+                strHighScore = '<br><br><strong>GREAT! You have the beaten the highscore!</strong>';
                 setCookie ('BO_highscore', game.score, 7);
               }
 
+              var options = {
+                message: 'Game over, your score is: <strong>' + game.score + '</strong>.' + strHighScore + '<br><br>Press restart to go again',
+                title: 'GAME OVER',
+                useBin: true
+              };
+
+              eModal.alert(options);
+
+              $('#game-stop').hide();
+              $('#game-start').show();
+              $('#game-start').text(' Restart ');
+              $('#pauze-game').prop('disabled', true);
             }
           }
       }
@@ -442,7 +471,7 @@ $( document ).ready(function() {
       //Collision of the blocks
       for (i=0; i<game.blocks; i++) {
 
-//        if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
+        //if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
         if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
@@ -467,7 +496,7 @@ $( document ).ready(function() {
           game.blocksLeft--;
           game.score += 10;
 
-          if (game.score > game.highscore) {
+          if ((game.score > game.highscore) && (game.score > 0)) {
             game.highscore = game.score;
           }
         }
@@ -485,8 +514,9 @@ $( document ).ready(function() {
         }
         game.level++;
 
+        sleep (1000);
         loadLevel ();
-        resetGame ();
+        resetBatBall ();
 
         game.state = 'play'; //ready_run
       }
@@ -494,8 +524,10 @@ $( document ).ready(function() {
        ball.changePosition (bat.x + 50, Defaults.ball.y);
     }
   }
+  //|End of function
+  //********************************************
 
-  //*******************************************************
+  //********************************************
   //| Use cookies to set the highscore
   //| Write the highscore
   function setCookie(name, value, days) {
@@ -524,7 +556,7 @@ $( document ).ready(function() {
     createCookie (name,"",-1);
   }
   //| End of high-score-section
-  //*******************************************************
+  //********************************************
 
   function gameSettings(state, level, score, lives, blocks, blocksLeft) {
 
@@ -681,7 +713,6 @@ $( document ).ready(function() {
     this.h       = h;
     this.border  = borderColor;
     this.fill    = fillColor;
-//    this.status  = status;
     this.visible = visible; 
 
     objectBlock.prototype.init = function(x, y, w, h, borderColor, fillColor, visible) {
@@ -738,6 +769,27 @@ $( document ).ready(function() {
       }
   };
 
+  function resetBatBall() {
+    ball.dx = Defaults.ball.dx;
+    ball.dy = Defaults.ball.dy;
+    bat.x   = Defaults.bat.x;
+    bat.y   = Defaults.bat.y;
+    bat.w   = Defaults.bat.w;    
+    ball.changePosition (Defaults.ball.x, Defaults.ball.y);
+  }
+
+  function restartGame() {
+    resetBatBall();
+    game.lives     = Defaults.game.lives;
+    game.highscore = game.score;
+    game.score     = 0;
+    game.level     = 1;
+    game.state     = 'play';
+    loadLevel();
+    sleep(1000);
+    draw();
+  }
+
   function stopLoop() {
     clearInterval(Defaults.game.handle);
   }
@@ -755,7 +807,7 @@ $( document ).ready(function() {
     }
   }
 
-  function debug() {
+  function drawDebugInformation() {
     $('#debug').show();
 
     $('#fps').text(Math.round(Defaults.game.interval / Defaults.game.fps));
