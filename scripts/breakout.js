@@ -113,16 +113,17 @@ $( document ).ready(function() {
   //|            -) Next line
   // Level, starts on 10, length = 60 (makes is a bit easier)  
   var levels       = [
-                       ['0', '', '0 is not a level'],
-                       ['1', 'google',     '0000100000000'],
-                       ['2', 'pastel',     '----0000030000040'],
-                       ['3', 'pastel',     '0301002300110-0204020010130-0121030040410-0204020030140-0302003100210'],
-                       ['4', 'microsoft',  '4321120344321-0000000000000-0100011000110-1100101101001-0100001000010-0100010001001-1110111100110-0000000000000-1234430211234'],
-                       ['5', 'google',     '1010002344340-1011223443111-1421134121111-0424230023000-1414303421100-1111200131111-1131121304111'],
-                       ['6', 'microsoft',  '1214334423411-4242242141312-2231434500214-1041313542043-1313144431321-1141114212333-1232113100213'],
-                       ['7', 'facebook',   '1010132432230-0231332411100-1341234231431-3123012031044-0313310330312-0323012312130-0412442424212'],
-                       ['8', 'caucasian',  '1232123442311-2324123141312-5243113250234-1041434134231-1313214301321-1143342412333-1243213121355'],
-                       ['9', 'pastel',     '1422233244131-1322423124112-4541412502034-2034134324201-4231323414341-4131144212333-4143310254523'],
+                       ['0',  '', '0 is not a level'],
+                       ['1',  'google',     '0000100000000'],
+                       ['2',  'pastel',     '----0000030000040'],
+                       ['3',  'pastel',     '0301002300110-0204020010130-0121030040410-0204020030140-0302003100210'],
+                       ['4',  'microsoft',  '4321120344321-0000000000000-0100011000110-1100101101001-0100001000010-0100010001001-1110111100110-0000000000000-1234430211234'],
+                       ['5',  'google',     '1010002344340-1011223443111-1421134121111-0424230023000-1414303421100-1111200131111-1131121304111'],
+                       ['6',  'caucasian',  '0131231324332-1043204230234-1121312133244-0213123403242-1233012301123-0123240330303-0000000000000-1102310241324-3213241342432,1234242341100'],
+                       ['7',  'microsoft',  '1214334423411-4242242141312-2231434400214-1041313142043-1313144431321-1141114212333-1232113100213'],
+                       ['8',  'facebook',   '1010132432230-0231332411100-1341234231431-3123012031044-0313310330312-0323012312130-0412442424212'],
+                       ['9',  'caucasian',  '1232123442311-2324123141312-0243113220234-1041434134231-1313214301321-1143342412333-1243213121321'],
+                       ['10', 'pastel',     '1422233244131-1322423124112-4141412002034-2034134324201-4231323414341-4131144212333-4143310244023'],
                      ];
      
   // Level, starts on 0, length = 40  
@@ -149,11 +150,12 @@ $( document ).ready(function() {
 
     if (game.state === 'gameover') {
       restartGame();
-    }// else {
-      $('#game-start').hide();
-      $('#game-stop').show();
-      startLoop();
-    //}
+    }
+    $('#game-start').hide();
+    $('#game-stop').show();
+    startLoop();
+    
+    game.state = 'play_ready';
   });
 
   //Stop the game. If you press stop a confirm button is displayed to confirm your choice. Based on that solution, the game will continue or is resetted
@@ -163,15 +165,18 @@ $( document ).ready(function() {
     var options = {
             message: 'Do you really want to quite? <br><br> I am sure you will beat the game! Common just one more level... you will be amazed!',
             title:   ':( You leaving already ?',
-            size: eModal.size.s,
-            label: "Yes"
+            size:    eModal.size.s,
+            label:   'Yes'
       };
 
       eModal.confirm(options).then(function(){
-        $('#game-stop').hide();
-        $('#game-start').show();
-        $('#game-start').text(' Restart ');
-        $('#pauze-game').prop('disabled', true);
+        $('#game-stop').hide  ();
+        $('#game-start').show ();
+        $('#game-start').text (' Start ');
+        $('#pauze-game').prop ('disabled', true);
+
+        drawText('', 1, 1);
+
 
         restartGame();
 
@@ -184,9 +189,11 @@ $( document ).ready(function() {
   //| Also the text on the button will changed
   $('#pauze-game').click(function(){
     if ($('#pauze-game').text() === ' Pauze ') {
+      game.state = 'pauze';
       stopLoop();
       $('#pauze-game').text(' Resume ');
     } else {
+      game.state = 'run';
       startLoop();
       $('#pauze-game').text(' Pauze ');
     }
@@ -195,18 +202,6 @@ $( document ).ready(function() {
 
   //Open function: init. It set default values
   init();
-
-  //********************************************
-  //| The game loop
-  function run() {
-
-    getInput();                 //Get user input
-    getCollision ();            //Get and process ball collision
-
-    draw();                      //Function to draw all the elements that needs to be refresed every cycle
-  }
-  //| End of the loop
-  //********************************************
 
   function init() {
 
@@ -231,7 +226,7 @@ $( document ).ready(function() {
     //New ball object and initalize it
     //| It uses the variables in the Defaults-object
     ball = new objectBall();
-    ball.init (Defaults.ball.x, Defaults.ball.y, Defaults.ball.r, Defaults.ball.color, Defaults.ball.dx, Defaults.ball.dxMax, Defaults.ball.dy);
+    ball.init (Defaults.ball.x, Defaults.ball.y, Defaults.ball.r, Defaults.ball.color, Defaults.ball.dx, Defaults.ball.dxMax, Defaults.ball.dy, 1);
     //*******************************************************
     
     //Rest the bat and ball to their staring position    
@@ -247,6 +242,19 @@ $( document ).ready(function() {
     window.addEventListener ('keyup', function(event) { Key.onKeyup(event); }, false);
     window.addEventListener ('keydown', function(event) { Key.onKeydown(event); }, false);
   }
+
+  //********************************************
+  //| The game loop
+  function run() {
+
+    getInput();                 //Get user input
+    getCollision ();            //Get and process ball collision
+
+    draw();                      //Function to draw all the elements that needs to be refresed every cycle
+  }
+  //| End of the loop
+  //********************************************
+
 
   function loadLevel() {
     var strLevel   = levels[game.level][2];
@@ -273,7 +281,7 @@ $( document ).ready(function() {
         }
 
         block[arrayLevel] = new objectBlock();
-        block[arrayLevel].init (blockX, blockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, bc, fc, 'yes');
+        block[arrayLevel].init (blockX, blockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, bc, fc, 'yes', strLevel[i]);
 
         blockX = blockX + Defaults.blocks.blockLength;
         arrayLevel++;
@@ -297,16 +305,20 @@ $( document ).ready(function() {
     //Clear the canvas
     ctx.clearRect (0, 0, canvas.width, canvas.height);
 
-    if (game.state === 'ready_run') {
+    if (game.state === 'play') {
+      drawText('', 290, 400);
+    }
+
+    if (game.state === 'run_ready') {
       drawCountDown();
+    }
+
+    if (game.state === 'play_ready') {
+      drawText('Press <SPACE> to start', 290, 400);
     }
 
     if (game.state === 'gameover') {
       drawText('Press restart to restart the game', 240, 400);
-    }
-
-    if (game.state === 'play') {
-      drawText('Press <SPACE> to start', 290, 400);
     }
 
 
@@ -357,50 +369,51 @@ $( document ).ready(function() {
   //| Draw the UI components that needs to be refreshed every frame
   function updateUI() { 
     $('#hscore').text (game.highscore);   //Display the highscore of the game. The score is stored in a cookie
-    $('#level').text (game.level);        //Display the level in the span-level
-    $('#score').text (game.score);        //Display the score in the span-level
+    $('#level').text  (game.level);       //Display the level in the span-level
+    $('#score').text  (game.score);       //Display the score in the span-level
 
     //Display the live-hearts. The maximum of hearts is 5
-    for (i=1;i<=Defaults.game.livesMax; i++) {
-      $('#live' + i).attr("src", 'images/live_full.png');                       //Set all the hearts to full
-      if (i > game.lives)  $('#live' + i).attr("src", 'images/live_empty.png'); //Change the hearts to empty of the amount that the player died in the game 
+    for (i = 1; i <= Defaults.game.livesMax; i++) {
+      $('#live' + i).attr('src', 'images/live_full.png');                       //Set all the hearts to full
+      if (i > game.lives)  $('#live' + i).attr ('src', 'images/live_empty.png'); //Change the hearts to empty of the amount that the player died in the game 
     }    
 
     if (game.state === 'run') {
-      $('#pauze-game').prop('disabled', false);
+      $('#pauze-game').prop ('disabled', false);
     } else {
-      $('#pauze-game').prop('disabled', true);
+      $('#pauze-game').prop ('disabled', true);
     }
 
-    //drawDebugInformation();                    //Show debug information
+    drawDebugInformation ();                    //Show debug information
   }
   //| End of function
   //********************************************
 
   function getInput() {
 
-    if ((game.state === 'run') || (game.state === 'play') || (game.state === 'ready_run')) {
+    if ((game.state === 'play') || (game.state === 'run_ready') || (game.state === 'play_ready')  || game.state === 'run') {
 
-      if (Key.isDown(Key.LEFT))  bat.moveLeft();
-      if (Key.isDown(Key.RIGHT)) bat.moveRight();
+      if (Key.isDown (Key.LEFT))  bat.moveLeft ();
+      if (Key.isDown (Key.RIGHT)) bat.moveRight ();
     }
 
     //Input here :D
-    if (Key.isDown(Key.SPACE) && (game.state === 'play'))   {
-      game.state = 'ready_run';
-      playSound(snd_start);
+    if (Key.isDown (Key.SPACE) && (game.state === 'play_ready'))   {
+      game.state = 'run_ready';
+      playSound (snd_start);
     }
   }
 
   //********************************************
   //| Collision and movement of the ball
   function getCollision() {
+    var scoreMultiplier;
 
     if (game.state === 'run') {
       //Doe stuiter-shit met the ball
       if (ball.x + ball.dx > canvas.width-ball.r || ball.x + ball.dx < ball.r) {
           ball.dx = -ball.dx;
-          playSound(snd_bounce);
+          playSound (snd_bounce);
       }
 
       if (ball.y + ball.dy > canvas.height-ball.r || ball.y + ball.dy < ball.r) {
@@ -410,14 +423,14 @@ $( document ).ready(function() {
           game.lives--;
           
           //Resetting ball and bat
-          game.state = 'play';  //ready_run
+          game.state = 'play_ready'; 
           resetBatBall();
 
           if (game.lives === 0) {
             var strHighScore = '';
 
             game.state = 'gameover';
-            playSound(snd_bounce);
+            playSound (snd_lose);
 
             if ((game.score >= game.highscore) && (game.score > 0)) {
               strHighScore = '<br><br><strong>GREAT! You have the beaten the highscore!</strong>';
@@ -432,22 +445,22 @@ $( document ).ready(function() {
 
             eModal.alert(options);
 
-            $('#game-stop').hide();
-            $('#game-start').show();
-            $('#game-start').text(' Restart ');
-            $('#pauze-game').prop('disabled', true);
+            $('#game-stop').hide  ();
+            $('#game-start').show ();
+            $('#game-start').text (' Restart ');
+            $('#pauze-game').prop ('disabled', true);
           } else {
-            playSound(snd_miss_ball);
+            playSound (snd_miss_ball);
           }
         } else {
-          playSound(snd_bounce);
+          playSound (snd_bounce);
         }
       }
 
       //Collision of the bat
       if (((ball.x+ball.r/2 >= bat.x) && (ball.x-ball.r/2 <= bat.x+bat.w)) && ((ball.y+ball.r/2 >= bat.y) && (ball.y-ball.r/2 <= bat.y+bat.h))) {
         var posBallBat = ball.x - bat.x;
-          playSound(snd_bounce);
+        playSound(snd_bounce);
 
         if ((ball.x >= bat.x) && (ball.x <= (bat.x+bat.w)) && ((ball.y >= bat.y) && (ball.y <= bat.y+bat.h))) {
           //console.log ('Side');
@@ -486,6 +499,7 @@ $( document ).ready(function() {
         //if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
         if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
           playSound(snd_bounce);
+          scoreMultiplier = block[i].multiplier;
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
             //console.log ('Side');
@@ -507,7 +521,7 @@ $( document ).ready(function() {
           }
           block[i].visible = 'no';
           game.blocksLeft--;
-          game.score += 10;
+          game.score += 10*scoreMultiplier;
 
           if ((game.score > game.highscore) && (game.score > 0)) {
             game.highscore = game.score;
@@ -516,25 +530,29 @@ $( document ).ready(function() {
       }
 
       if (game.state != 'pauze') {
-        ball.changePosition(ball.x + ball.dx, ball.y + ball.dy);
+        ball.changePosition (ball.x + ball.dx, ball.y + ball.dy);
       }
 
       //You have won the level!!!!
       if (game.blocksLeft === 0) {
  
-        sleep (10 );
-        playSound(snd_win);
+        sleep (10);
+        playSound (snd_win);
 
         if (game.lives <= 5) {
           game.lives++;
         }
+
         game.level++;
+        if (game.level >= levels.length) {
+          game.level = 1;
+        }
 
         //sleep (1000);
         loadLevel ();
         resetBatBall ();
 
-        game.state = 'play'; //ready_run
+        game.state = 'play_ready'; //ready_run
       }
     } else {
        ball.changePosition (bat.x + 50, Defaults.ball.y);
@@ -544,9 +562,9 @@ $( document ).ready(function() {
   //********************************************
 
   //Play sound, but only when the icon is checked
-  function playSound (sound) {
+  function playSound(sound) {
     if ($('#sound').is(':checked') === true) {
-        sound.play();
+        sound.play ();
     }
   }
 
@@ -557,10 +575,10 @@ $( document ).ready(function() {
     if (days) {
         var date = new Date ();
         date.setTime (date.getTime () + (days*24*60*60*1000));
-        var expires = "; expires=" + date.toGMTString ();
+        var expires = '; expires=' + date.toGMTString ();
     }
-    else var expires = "";
-    document.cookie = name + "=" + value+expires + "; path=/";
+    else var expires = '';
+    document.cookie = name + '=' + value+expires + '; path=/';
   }
 
   //Get the highscore
@@ -576,7 +594,7 @@ $( document ).ready(function() {
   }
 
   function eraseCookie(name) {
-    createCookie (name,"",-1);
+    createCookie (name,'',-1);
   }
   //| End of high-score-section
   //********************************************
@@ -666,13 +684,13 @@ $( document ).ready(function() {
   //Object Bat
   function objectBat(x, y, w, h, s, borderColor, fillColor) {
 
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h  = h;
-    this.s      = s;
-    this.border = borderColor;
-    this.fill   = fillColor;
+    this.x           = x;
+    this.y           = y;
+    this.w           = w;
+    this.h           = h;
+    this.s           = s;
+    this.border      = borderColor;
+    this.fill        = fillColor;
 
     objectBat.prototype.init = function(x, y, w, h, s, borderColor, fillColor) {
       this.x = x;
@@ -716,7 +734,7 @@ $( document ).ready(function() {
       ctx.rect (this.x, this.y, this.w, this.h);
       
       //When I really want round corners :)
-      //ctx.lineJoin = "round";
+      //ctx.lineJoin = 'round';
       //ctx.lineWidth = 10;
 
       ctx.fillStyle = this.fill;
@@ -729,23 +747,25 @@ $( document ).ready(function() {
   };
 
   //Object Blocks
-  function objectBlock(x, y, w, h, borderColor, fillColor, visible) {
-    this.x       = x;
-    this.y       = y;
-    this.w       = w;
-    this.h       = h;
-    this.border  = borderColor;
-    this.fill    = fillColor;
-    this.visible = visible; 
+  function objectBlock(x, y, w, h, borderColor, fillColor, visible, multiplier) {
+    this.x          = x;
+    this.y          = y;
+    this.w          = w;
+    this.h          = h;
+    this.border     = borderColor;
+    this.fill       = fillColor;
+    this.visible    = visible; 
+    this.multiplier = multiplier;
 
-    objectBlock.prototype.init = function(x, y, w, h, borderColor, fillColor, visible) {
-      this.x       = x;
-      this.y       = y;
-      this.w       = w;
-      this.h       = h;
-      this.border  = borderColor;
-      this.fill    = fillColor;
-      this.visible = visible;
+   objectBlock.prototype.init = function(x, y, w, h, borderColor, fillColor, visible, multiplier) {
+      this.x          = x;
+      this.y          = y;
+      this.w          = w;
+      this.h          = h;
+      this.border     = borderColor;
+      this.fill       = fillColor;
+      this.visible    = visible;
+      this.multiplier = multiplier;
     };
 
     objectBlock.prototype.hit = function(visible) {
@@ -808,40 +828,40 @@ $( document ).ready(function() {
     game.score     = 0;
     game.level     = 1;
     game.state     = 'play';
-    loadLevel();
-    sleep(1000);
-    draw();
+    loadLevel ();
+    sleep (1000);
+    draw ();
   }
 
   function stopLoop() {
-    clearInterval(Defaults.game.handle);
+    clearInterval (Defaults.game.handle);
   }
 
   function startLoop() {
-    clearInterval(Defaults.game.handle);
+    clearInterval (Defaults.game.handle);
     Defaults.game.handle = setInterval (run, (Defaults.game.interval / Defaults.game.fps));
   }
 
   function sleep(miliseconds) {
-    var currentTime = new Date().getTime();
+    var currentTime = new Date ().getTime ();
 
     //Really do nothing :)    
-    while (currentTime + miliseconds >= new Date().getTime()) {
+    while (currentTime + miliseconds >= new Date ().getTime ()) {
     }
   }
 
   function drawDebugInformation() {
-    $('#debug').show();
+    $('#debug').show ();
 
-    $('#fps').text(Math.round(Defaults.game.interval / Defaults.game.fps));
-    $('#state').text(game.state);
-    $('#batx').text(Math.round(bat.x));
-    $('#baty').text(Math.round(bat.y));
-    $('#ballx').text(Math.round(ball.x));
-    $('#ballxs').text(Math.round(ball.dx));
-    $('#bally').text(Math.round(ball.y));
-    $('#ballys').text(Math.round(ball.dy));
-    $('#total').text(game.blocks);
-    $('#left').text(game.blocksLeft);
+    $('#fps').text    (Math.round(Defaults.game.interval / Defaults.game.fps));
+    $('#state').text  (game.state);
+    $('#batx').text   (Math.round(bat.x));
+    $('#baty').text   (Math.round(bat.y));
+    $('#ballx').text  (Math.round(ball.x));
+    $('#ballxs').text (Math.round(ball.dx));
+    $('#bally').text  (Math.round(ball.y));
+    $('#ballys').text (Math.round(ball.dy));
+    $('#total').text  (game.blocks);
+    $('#left').text   (game.blocksLeft);
   }
 });
