@@ -32,6 +32,11 @@
         <div class="col-md-2 score-wrapper">
 
           <div class="row score-level">
+            <h2>High score</h2>
+            <p><span id="hscore">1</span></p>
+          </div>
+
+          <div class="row score-level">
             <h2>Level</h2>
             <p><span id="level">1</span></p>
           </div>
@@ -51,7 +56,16 @@
             <!--<p><span id="lives">0</span></p>-->
           </div>
 
+          <div class="row">
+            &nbsp;
+          </div>
+          <div class="row">
+            &nbsp;
+          </div>
+
           <div class="row text-center">
+            <button id="game-start"> Start </button>
+            <button id="game-stop"> Stop </button>
             <button id="pauze-game" disabled> Pauze </button>
           </div>
 
@@ -62,16 +76,12 @@
             <br>Bat - X: <class id="batx"></class>, Y: <class id="baty"></class>
             <br>Ball - X: <class id="ballx"></class>, Y: <class id="bally"></class> 
             <br>Ball X-speed: <class id="ballxs"></class>, Y-speed: <class id="ballys"></class>
+            <br>Total: <class id="total"></class>, Left: <class id="left"></class>
           </div>
 
         </div>
       </div>
     </div>
-
-<button id="stop">Stop</button>
-<button id="start">Start</button>
-
-
 
   </body>
 </html>

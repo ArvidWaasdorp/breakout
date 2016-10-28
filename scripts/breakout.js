@@ -37,7 +37,8 @@ var Defaults = {
 
   blocks: {
     startBlockY : 50,
-    blockLength : 40,
+    startBlockX : 10, 
+    blockLength : 60, //40
     blockHeight : 20,
     blockSpacing: 0,
   }
@@ -103,16 +104,28 @@ $( document ).ready(function() {
   //|            1 till 4) scheme colors
   //|            4) Scheme 4
   //|            -) Next line
+  // Level, starts on 10, length = 60 (makes is a bit easier)  
   var levels       = [
                        ['0', '', '0 is not a level'],
-                       ['1', 'google',     '00000000000000000000-00000000000000001000-00000000000000000000-00000000000000000000-00000000000000000000-00000000000000000000-00000000000000000000'],
-                       ['2', 'google',     '10100023432341243240-11001123234141441111-11412411341121213111-04124023003203010000-14134130032412311010-11113213120013211111-14132113211340341111'],
-                       ['3', 'microsoft',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
-                       ['4', 'facebook',   '10101324231422431010-02313123123410111100-32134123412321341231-31230123031301320414-03123023213030130312-03123013201230123130-04124412421432424212'],
-                       ['5', 'caucasian',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
-                       ['6', 'pastel',     '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+                       ['1', 'google',     '0000100000000-0000000000000-0000000000000-0000000000000-0000000000000-0000000000000-0000000000000'],
+                       ['2', 'google',     '1010002344340-1011223443111-1421134121111-0424230023000-1414303421100-1111200131111-1131121304111'],
+                       ['3', 'microsoft',  '1214334423411-4242242141312-2231434500214-1041313542043-1313144431321-1141114212333-1232113100213'],
+                       ['4', 'facebook',   '1010132432230-0231332411100-1341234231431-3123012031044-0313310330312-0323012312130-0412442424212'],
+                       ['5', 'caucasian',  '1232123442311-2324123141312-5243113250234-1041434134231-1313214301321-1143342412333-1243213121355'],
+                       ['6', 'pastel',     '1422233244131-1322423124112-4541412502034-2034134324201-4231323414341-4131144212333-4143310254523'],
                      ];
-  
+ 
+  // Level, starts on 0, length = 40  
+  // var levels       = [
+  //                      ['0', '', '0 is not a level'],
+  //                      ['1', 'google',     '00000000000000000000-00000000000000001000-00000000000000000000-00000000000000000000-00000000000000000000-00000000000000000000-00000000000000000000'],
+  //                      ['2', 'google',     '10100023432341243240-11001123234141441111-11412411341121213111-04124023003203010000-14134130032412311010-11113213120013211111-14132113211340341111'],
+  //                      ['3', 'microsoft',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+  //                      ['4', 'facebook',   '10101324231422431010-02313123123410111100-32134123412321341231-31230123031301320414-03123023213030130312-03123013201230123130-04124412421432424212'],
+  //                      ['5', 'caucasian',  '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+  //                      ['6', 'pastel',     '12321342332434123411-41234242341231241312-42524312413245002134-12034414341312314231-41234132123414131321-14124313141242412333-41124323141233100213'],
+  //                    ];
+
   var game         = null;    //Game object, stores generic variabales of the game like; lives, score, blocks left
   var bat          = null;    //Bat object, stores generic variables like; size, speed, width. Also give access to methodes like move left and move right
   var ball         = null;    //Ball object, stores generic variables like; size, speed, radius. Also give access to methodes
@@ -121,12 +134,24 @@ $( document ).ready(function() {
 
   //**************************************************
   //| Current implementation of starting and stopping the game
-  $('#start').click(function(){
+  $('#game-start').click(function(){
+    $('#game-start').hide();
+    $('#game-stop').show();
     startLoop();
   });
-  $('#stop').click(function(){
+
+  $('#game-stop').click(function(){
+    $('#game-stop').hide();
+    $('#game-start').show();
     stopLoop();
   });
+
+
+
+
+  // $('#stop').click(function(){
+  //   stopLoop();
+  // });
   //| Current implementation of starting and stopping the game
   //**************************************************
 
@@ -148,7 +173,6 @@ $( document ).ready(function() {
   //Init the game. Set default values
   init();
 
-
   //********************************************
   //| The game loop
   function run() {
@@ -168,6 +192,8 @@ $( document ).ready(function() {
     //console.log ('Init game');
     
     $('#pauze-game').prop('disabled', true);    //Disable the pauze-button by default (page load)
+    $('#game-stop').hide();                     //Little cheat to hide the stop-button on load
+
     $('#debug').hide();                         //Hide the debug-div by default (page load)
 
     //*******************************************************
@@ -191,7 +217,7 @@ $( document ).ready(function() {
     resetGame();
 
     //Retrieve the highscore of the user stored in a cookie
-    game.highscore = getCookie('BO_highscore'); 
+    game.highscore = getCookie('BO_highscore') || 0; 
 
     //Load the level
     loadLevel ();
@@ -228,7 +254,7 @@ $( document ).ready(function() {
         }
 
         block[arrayLevel] = new objectBlock();
-        block[arrayLevel].init (blockX, blockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, bc, fc, 'alive');
+        block[arrayLevel].init (blockX, blockY, Defaults.blocks.blockLength, Defaults.blocks.blockHeight, bc, fc, 'yes');
 
         blockX = blockX + Defaults.blocks.blockLength;
         arrayLevel++;
@@ -239,7 +265,7 @@ $( document ).ready(function() {
       }
 
       if (strLevel[i] === '-') {
-        blockX = 0;
+        blockX = Defaults.blocks.startBlockX;
         blockY = blockY + Defaults.blocks.blockHeight + Defaults.blocks.blockSpacing;
       }
     }
@@ -252,6 +278,8 @@ $( document ).ready(function() {
     //Clear the canvas
     ctx.clearRect (0, 0, canvas.width, canvas.height);
 
+//    console.log ('loop'); 
+
     if (game.state === 'ready_run') {
       drawCountDown();
     }
@@ -262,7 +290,7 @@ $( document ).ready(function() {
     //Draw the blocks. They are stored in a array which needs to be checked.
     //In case the block is hit, the value will not be 'dead'. Only the alive values must be drawed
     for (i=0; i<game.blocks; i++) {
-      if (block[i].status === 'alive') {
+      if (block[i].visible === 'yes') {
         block[i].draw ();
       }
     }
@@ -294,23 +322,24 @@ $( document ).ready(function() {
     }
   }
   
-
-  function drawText(str) {
-    ctx.font = "30px Arial";
-    ctx.fillText (str, 370, 300);
-  }
-
   //**********************************************************
   //| Draw the UI components that needs to be refreshed every frame
   function updateUI() { 
-    $('#level').text (game.level);  //Display the level in the span-level
-    $('#score').text (game.score);  //Display the score in the span-level
+    $('#hscore').text (game.highscore);   //Display the highscore of the game. The score is stored in a cookie
+    $('#level').text (game.level);        //Display the level in the span-level
+    $('#score').text (game.score);        //Display the score in the span-level
 
     //Display the live-hearts. The maximum of hearts is 5
     for (i=1;i<=Defaults.game.livesMax; i++) {
       $('#live' + i).attr("src", 'images/live_full.png');                       //Set all the hearts to full
       if (i > game.lives)  $('#live' + i).attr("src", 'images/live_empty.png'); //Change the hearts to empty of the amount that the player died in the game 
     }    
+
+    if (game.state === 'run') {
+       $('#pauze-game').prop('disabled', false);
+    } else {
+      $('#pauze-game').prop('disabled', true);
+    }
   }
   //| End of function
   //**********************************************************
@@ -366,9 +395,6 @@ $( document ).ready(function() {
             if (game.lives === 0) {
               game.state = 'gameover';
 
-              drawText (ctx, 'Game over :(');
-              
-
               if (game.score > game.highscore) {
                 setCookie ('BO_highscore', game.score, 7);
               }
@@ -416,7 +442,8 @@ $( document ).ready(function() {
       //Collision of the blocks
       for (i=0; i<game.blocks; i++) {
 
-        if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].status === 'alive')) {
+//        if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r/2 <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r/2 <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
+        if (((ball.x+ball.r/2 >= block[i].x) && (ball.x-ball.r <= block[i].x+block[i].w)) && ((ball.y+ball.r/2 >= block[i].y) && (ball.y-ball.r <= block[i].y+block[i].h)) && (block[i].visible === 'yes')) {
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
             //console.log ('Side');
@@ -426,19 +453,23 @@ $( document ).ready(function() {
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)))  {
             if (ball.y <= block[i].y) {
-              //console.log ('Top');
+              console.log ('Top');
               ball.dx = +ball.dx;
               ball.dy = -ball.dy;
             } 
-            if ((ball.x <= block[i].x+block[i].w) && (ball.y >= block[i].y+block[i].h)) {
+            if ((ball.x+ball.r <= block[i].x+block[i].w) && (ball.y >= block[i].y+block[i].h)) {
               //console.log ('Bottom');
               ball.dx = +ball.dx;
               ball.dy = -ball.dy;
             }
           }
-          block[i].status = 'dead';
+          block[i].visible = 'no';
           game.blocksLeft--;
           game.score += 10;
+
+          if (game.score > game.highscore) {
+            game.highscore = game.score;
+          }
         }
       }
 
@@ -449,7 +480,9 @@ $( document ).ready(function() {
       //You have won the level!!!!
       if (game.blocksLeft === 0) {
  
-        game.lives++;
+        if (game.lives <= 5) {
+          game.lives++;
+        }
         game.level++;
 
         loadLevel ();
@@ -469,7 +502,7 @@ $( document ).ready(function() {
     if (days) {
         var date = new Date ();
         date.setTime (date.getTime () + (days*24*60*60*1000));
-        var expires = "; expires=" +date.toGMTString ();
+        var expires = "; expires=" + date.toGMTString ();
     }
     else var expires = "";
     document.cookie = name + "=" + value+expires + "; path=/";
@@ -477,18 +510,18 @@ $( document ).ready(function() {
 
   //Get the highscore
   function getCookie(name) {
-    var nameEQ = name + "=";
+    var nameEQ = name + '=';
     var ca = document.cookie.split (';');
-    for(var i=0;i < ca.length;i++) {
+    for (var i=0;i < ca.length;i++) {
         var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring (1,c.length);
-        if (c.indexOf (nameEQ) == 0) return c.substring (nameEQ.length,c.length);
+        while (c.charAt(0) == ' ') c = c.substring (1, c.length);
+        if (c.indexOf (nameEQ) == 0) return c.substring (nameEQ.length, c.length);
     }
     return null;
   }
 
   function eraseCookie(name) {
-    createCookie(name,"",-1);
+    createCookie (name,"",-1);
   }
   //| End of high-score-section
   //*******************************************************
@@ -641,27 +674,28 @@ $( document ).ready(function() {
   };
 
   //Object Blocks
-  function objectBlock(x, y, w, h, borderColor, fillColor, status) {
-    this.x      = x;
-    this.y      = y;
-    this.w      = w;
-    this.h      = h;
-    this.border = borderColor;
-    this.fill   = fillColor;
-    this.status = status;
+  function objectBlock(x, y, w, h, borderColor, fillColor, visible) {
+    this.x       = x;
+    this.y       = y;
+    this.w       = w;
+    this.h       = h;
+    this.border  = borderColor;
+    this.fill    = fillColor;
+//    this.status  = status;
+    this.visible = visible; 
 
-    objectBlock.prototype.init = function(x, y, w, h, borderColor, fillColor, status) {
-      this.x      = x;
-      this.y      = y;
-      this.w      = w;
-      this.h      = h;
-      this.border = borderColor;
-      this.fill   = fillColor;
-      this.status = status;
+    objectBlock.prototype.init = function(x, y, w, h, borderColor, fillColor, visible) {
+      this.x       = x;
+      this.y       = y;
+      this.w       = w;
+      this.h       = h;
+      this.border  = borderColor;
+      this.fill    = fillColor;
+      this.visible = visible;
     };
 
-    objectBlock.prototype.aLive = function(status) {
-      this.status = status;
+    objectBlock.prototype.hit = function(visible) {
+      this.visible = visible;
     };
 
     objectBlock.prototype.draw = function() {
@@ -711,7 +745,6 @@ $( document ).ready(function() {
   function startLoop() {
     clearInterval(Defaults.game.handle);
     Defaults.game.handle = setInterval (run, (Defaults.game.interval / Defaults.game.fps));
-    $('#pauze-game').prop('disabled', false);
   }
 
   function sleep(miliseconds) {
@@ -733,5 +766,7 @@ $( document ).ready(function() {
     $('#ballxs').text(Math.round(ball.dx));
     $('#bally').text(Math.round(ball.y));
     $('#ballys').text(Math.round(ball.dy));
+    $('#total').text(game.blocks);
+    $('#left').text(game.blocksLeft);
   }
 });
