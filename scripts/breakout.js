@@ -229,11 +229,14 @@ $( document ).ready(function() {
 
     $('#debug').hide();                         //Hide the debug-div by default (page load)
 
+//$('.progress-bar').toggleClass('active');
+
+
     //*******************************************************
     //| New game object and initalize it
     //| It uses the variables in the Defaults-object
     game = new gameSettings();
-    game.init ('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft, 0, 0);
+    game.init ('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft, 0, Defaults.powerup.time, false);
 
     //New bat object and initalize it
     //| It uses the variables in the Defaults-object
@@ -269,14 +272,13 @@ $( document ).ready(function() {
   function run() {
 
     getInput();                 //Get user input
-    getCollision ();            //Get and process ball collision
-    getPowerUp();
+    getCollision();             //Get and process ball collision
+    getPowerUp();               //Process the powerups
 
-    draw();                      //Function to draw all the elements that needs to be refresed every cycle
+    draw();                     //Function to draw all the elements that needs to be refresed every cycle
   }
   //| End of the loop
   //********************************************
-
 
   function loadLevel() {
     var strLevel   = levels[game.level][2];
@@ -339,12 +341,12 @@ $( document ).ready(function() {
     //| 1) circle > widen bat
     //| 2) add a multiplier to the score
     //| Only draw when 1 or 2 is draw and the powerup must be displayed (visible, yes)
-    if (((game.powerup === 1) || ((game.powerup === 2))) && (powerup.visible === true)) {
-      if (game.powerup === 1) {
-        powerup.drawCircle();   //Draw power-up: circle
-      } else {
-        powerup.drawCube();     //Draw power-up: cube
+    if (powerup.visible === true) {
+      switch (game.powerup) {
+        case 1: powerup.drawCircle(); break;      //Draw power-up: circle
+        case 2: powerup.drawCube();   break;      //Draw power-up: cube
       }
+      $('#progress-bar').css('width', '100%');
     }
     //**************************************
 
@@ -410,7 +412,7 @@ $( document ).ready(function() {
       $('#pauze-game').prop ('disabled', true);
     }
 
-    //drawDebugInformation ();                    //Show debug information
+//    drawDebugInformation ();                    //Show debug information
   }
   //********************************************
 
@@ -438,39 +440,42 @@ $( document ).ready(function() {
   //| 2) score multiplier *1.5
   function getPowerUp() {
 
-    if ((game.powerup >= 1) && (game.powerup <= 2) && (powerup.visible === true)) {
-
-      if (powerup.y > canvas.height) {
-        game.powerup       = 0;
-        game.powerupActive = 0;
-      }
-
+    if (powerup.visible === true) {
       if ((powerup.y > bat.y) && (powerup.x > bat.x) && (powerup.x < bat.x+bat.w)) {
-        powerup.visible = false;
-        powerup.x       = Defaults.powerup.x;
-        powerup.y       = Defaults.powerup.y;
-        game.powerupActive++;
+        powerup.visible    = false;
+        powerup.x          = Defaults.powerup.x;
+        powerup.y          = Defaults.powerup.y;
+        game.powerupActive = true;
       } else {
         powerup.y = powerup.y+Defaults.powerup.s;
       }
+
+      if (powerup.y > canvas.height) {
+        powerup.visible    = false;
+        powerup.x          = Defaults.powerup.x;
+        powerup.y          = Defaults.powerup.y;
+        $('#progress-bar').css('width', '0%');
+      }
     }
 
-    if (game.powerupActive > 0) {
-      game.powerupActive++;
+    if (game.powerupActive === true) {
+      game.powerupTime--;
 
-      if (game.powerup === 1) {
-        bat.w = Defaults.bat.w * 1.5;
-      } else {
+      var progressWidth = Math.round(100 - (100 - (game.powerupTime / (Defaults.powerup.time / 100))));
+      $('#progress-bar').css('width', progressWidth+'%');
+
+
+      switch (game.powerup) {
+        case 1:  bat.w = Defaults.bat.w * 1.5;  break;
+        case 2:  powerMultiplier = 2;           break;
+      }
+
+      if (game.powerupTime === 0) {
+        game.powerupActive = false;
+        game.powerupTime = Defaults.powerup.time;
+        bat.w = Defaults.bat.w;
         powerMultiplier = 2;
       }
-    } 
-
-    if (game.powerupActive >= Defaults.powerup.time) {
-      game.powerup       = 0;
-      powerup.visible    = false;
-      game.powerupActive = 0;
-      bat.w              = Defaults.bat.w;
-
     }
   }
   //********************************************
@@ -574,10 +579,15 @@ $( document ).ready(function() {
             game.powerup = Math.round((Math.random() * 5));
           }
 
-          if ((game.powerup >= 1) && (game.powerup <= 2) && (powerup.visible === false)) {
-            powerup.visible = true;
-            powerup.x       = ball.x;
-            powerup.y       = ball.y+ball.r;
+          if ((game.powerupActive === false) && (powerup.visible === false)) {
+            switch (game.powerup) {
+              case 1:
+              case 2:
+                powerup.visible = true;
+                powerup.x       = ball.x;
+                powerup.y       = ball.y+ball.r;
+                break;
+            }
           }
 
           if ((ball.x >= block[i].x) && (ball.x <= (block[i].x+block[i].w)) && ((ball.y >= block[i].y) && (ball.y <= block[i].y+block[i].h))) {
@@ -608,6 +618,7 @@ $( document ).ready(function() {
         }
       }
 
+      //Pauze the game
       if (game.state != 'pauze') {
         ball.changePosition (ball.x + ball.dx, ball.y + ball.dy);
       }
@@ -683,7 +694,7 @@ $( document ).ready(function() {
   //| An object has variables and functions (methods)
   //| 
   //| Object to store all the game variables
-  function gameSettings(state, level, score, lives, blocks, blocksLeft, powerup, powerupActive) {
+  function gameSettings(state, level, score, lives, blocks, blocksLeft, powerup, powerupTime, powerupActive) {
 
     this.state         = state;
     this.level         = level;
@@ -692,6 +703,7 @@ $( document ).ready(function() {
     this.blocks        = blocks;
     this.blocksLeft    = blocksLeft; 
     this.powerup       = powerup;
+    this.powerupTime   = powerupTime;
     this.powerupActive = powerupActive;
 
     gameSettings.prototype.changeBlocks = function(blocks) {
@@ -706,11 +718,11 @@ $( document ).ready(function() {
       this.level = level;
     }
 
-    gameSettings.prototype.changePowerUpActive = function(powerupActive) {
-      this.powerupActive = powerupActive;
+    gameSettings.prototype.changepowerupTime = function(powerupTime) {
+      this.powerupTime = powerupTime;
     }
 
-    gameSettings.prototype.init = function(state, level, score, lives, blocks, blocksLeft, powerup, powerupActive) {
+    gameSettings.prototype.init = function(state, level, score, lives, blocks, blocksLeft, powerup, powerupTime, powerupActive) {
       this.state         = state;
       this.level         = level;
       this.score         = score;
@@ -718,6 +730,7 @@ $( document ).ready(function() {
       this.blocks        = blocks;
       this.blocksLeft    = blocksLeft; 
       this.powerup       = powerup;
+      this.powerupTime = powerupTime;
       this.powerupActive = powerupActive;
     };
   } 
@@ -878,7 +891,7 @@ $( document ).ready(function() {
   };
 
   //| Object to store all the powerup variables and methods
-  function objectPowerUp(type, x, y, r, w, h, color, visble) {
+  function objectPowerUp(type, x, y, r, w, h, color, visible) {
     this.type    = type;
     this.x       = x;
     this.y       = y;
@@ -886,17 +899,17 @@ $( document ).ready(function() {
     this.w       = w,
     this.h       = h,
     this.color   = color
-    this.visible = visble;
+    this.visible = visible;
 
-    objectPowerUp.prototype.init = function(type, x, y, r, w, h, color, visble) {
-      this.type   = type;
-      this.x      = x;
-      this.y      = y;
-      this.r      = r;
-      this.w      = w;
-      this.h      = h;
-      this.color  = color;
-      this.visble = visble;
+    objectPowerUp.prototype.init = function(type, x, y, r, w, h, color, visible) {
+      this.type    = type;
+      this.x       = x;
+      this.y       = y;
+      this.r       = r;
+      this.w       = w;
+      this.h       = h;
+      this.color   = color;
+      this.visible = visible;
     };
 
     objectPowerUp.prototype.drawCircle = function() {
@@ -952,13 +965,16 @@ $( document ).ready(function() {
     powerup.y          = Defaults.powerup.y;
     powerup.visible    = false;
     game.powerup       = 0;
-    game.powerupActive = 0;
+    game.powerupTime   = Defaults.powerup.time;
+    game.powerupActive = false;
     ball.dx            = Defaults.ball.dx;
     ball.dy            = Defaults.ball.dy;
     bat.x              = Defaults.bat.x;
     bat.y              = Defaults.bat.y;
     bat.w              = Defaults.bat.w;    
     ball.changePosition (Defaults.ball.x, Defaults.ball.y);
+
+    $('#progress-bar').css('width', '0%');
   }
 
   function restartGame() {
@@ -1003,10 +1019,9 @@ $( document ).ready(function() {
     $('#ballys').text   (Math.round(ball.dy));
     $('#total').text    (game.blocks);
     $('#left').text     (game.blocksLeft);
-    $('#power').text    (game.powerup);
     $('#pvisible').text (powerup.visible);
-    $('#cycles').text   (game.powerupActive);
-    $('#powerx').text   (Math.round(powerup.x));
-    $('#powery').text   (Math.round(powerup.y));
+    $('#powert').text   (game.powerup);
+    $('#pactive').text  (game.powerupActive);
+    $('#cycles').text   (game.powerupTime);
   }
 });

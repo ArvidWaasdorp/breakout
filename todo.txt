@@ -22,6 +22,7 @@ Add power-ups                 done   (28 Oct) Implemented 2 power-ups
 Launch game on [space]        done   Simple implementation, see B2 > (26 Oct) Solved by adding a button that stops the game loop and restart it again
 Add lives                     done   Simple implementation, game stops nothing happends > (26 Oct) Added max lives and min lives.
 Sounds                        done   (28 Oct) Implemented sound using external library. Sounds via freesound.org
+Power-up time (31-okt)        open
 
 Usefull links:
 --------------------
@@ -47,4 +48,4 @@ https://developer.mozilla.org/nl/docs/Web/API/Canvas_API/Tutorial/Optimizing_can
 
 open -        - B1) BUG dat bal door de blokken gaat. Gebeurt nu vooral wanneer de bal van rechts boven naar links gaat!!!! 
 done - 26 Oct - B2) Space hangs :(, difficult to pauze and start the game again
-open -        - B3) Some times the power-up changes... or is gone....
+done - 28 Oct - B3) Some times the power-up changes... or is gone....           linked to "game.powerupActive" counter              - fixed by adding 1 new type of variable, also rewrite function getPowerUp
