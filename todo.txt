@@ -13,23 +13,33 @@ Create blocks                 done
 Remove blocks                 done   
 Create collision on blocks    done   Not briljant, but it works !!!Note see bugs!!!  
 Create score                  done   Simple implementation > (26 oct) Improved score and add high score via Cookies
-Create menu                   open   
+Create menu                   done   (28 Oct) Implementation using buttons   
 Create levels                 done   Must load correctly > (26 Oct) Load new level, increase amount of lives, reset the correct settings 
 Create text                   done   (26 Oct) Added text and countdown function   
 Change angle > hit on site    done   
 Change speed of ball          reject ? Do I want this? > (26 Oct) No, the angle will increase the difficulty and speed
-Add power-ups                 open   
+Add power-ups                 done   (28 Oct) Implemented 2 power-ups   
 Launch game on [space]        done   Simple implementation, see B2 > (26 Oct) Solved by adding a button that stops the game loop and restart it again
 Add lives                     done   Simple implementation, game stops nothing happends > (26 Oct) Added max lives and min lives.
+Sounds                        done   (28 Oct) Implemented sound using external library. Sounds via freesound.org
+Power-up time (31-okt)        done
 
 Usefull links:
+--------------------
 http://stackoverflow.com/questions/11368477/dynamically-resize-canvas-window-with-javascript-jquery
 https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
 ! https://github.com/jakesgordon/javascript-breakout
-
+! http://saribe.github.io/eModal/#                          (model window)
+! https://github.com/jakesgordon/javascript-audio-fx        (sound library)
+! https://www.freesound.org/pe                              (sounds)
+! https://lokesh-coder.github.io/pretty-checkbox/           (nice checkboxes)
+! http://www.softicons.com/toolbar-icons/mono-general-icons-4-by-custom-icon-design/sound-icon      (icons for sound)
+! http://www.softicons.com/toolbar-icons/mono-general-icons-4-by-custom-icon-design/sound-off-icon  (icons for sound)
+! http://www.color-hex.com/color-palette/389                                                        (one of the palets used)
 
 Help for collision detection 
 ? https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+
 
 Improve speed
 https://www.google.nl/search?q=this.pressed+slows+browser&oq=this.pressed+slows+browser&aqs=chrome..69i57.5912j0j4&sourceid=chrome&ie=UTF-8#q=canvas+draw+performance
@@ -38,3 +48,4 @@ https://developer.mozilla.org/nl/docs/Web/API/Canvas_API/Tutorial/Optimizing_can
 
 open -        - B1) BUG dat bal door de blokken gaat. Gebeurt nu vooral wanneer de bal van rechts boven naar links gaat!!!! 
 done - 26 Oct - B2) Space hangs :(, difficult to pauze and start the game again
+done - 28 Oct - B3) Some times the power-up changes... or is gone....           linked to "game.powerupActive" counter              - fixed by adding 1 new type of variable, also rewrite function getPowerUp

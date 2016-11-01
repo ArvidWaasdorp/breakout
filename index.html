@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Breakout test</title>
+    <title>NYCDA Breakout</title>
 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="viewport" content="width=device-width" initial-scale="1.0">
@@ -14,8 +14,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
     <script src="scripts/jquery-2.2.4.min.js"></script>
     <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/eModal.min.js"></script>
     <script src="scripts/breakout.js"></script>
-
+    <script src="scripts/audio-fx.min.js"></script>
   </head>
   <body>
 
@@ -30,7 +31,15 @@
           <canvas id="gameCanvas" width="800" height="600"></canvas>
         </div>
         <div class="col-md-2 score-wrapper">
-
+          <div class="row score-level">
+          <div class="row score-level">
+            <input type='checkbox' name='sound' value='valuable' id="sound" checked><label for="sound"></label>
+          </div> 
+          </div>
+          <div class="row score-level">
+            <h2>High score</h2>
+            <p><span id="hscore">1</span></p>
+          </div>
           <div class="row score-level">
             <h2>Level</h2>
             <p><span id="level">1</span></p>
@@ -42,36 +51,42 @@
           <div class="row score-lives">
             <h2>Lives</h2>
             <span id="lives">
-              <img class="lives" id="live1" src="images/live_full.png" alt="Breakout live full">
-              <img class="lives" id="live2" src="images/live_full.png" alt="Breakout live full">
-              <img class="lives" id="live3" src="images/live_full.png" alt="Breakout live full">
-              <img class="lives" id="live4" src="images/live_full.png" alt="Breakout live full">
-              <img class="lives" id="live5" src="images/live_full.png" alt="Breakout live full">
+              <img class="lives" id="live1" src="images/live_empty.png" alt="Breakout live full">
+              <img class="lives" id="live2" src="images/live_empty.png" alt="Breakout live full">
+              <img class="lives" id="live3" src="images/live_empty.png" alt="Breakout live full">
+              <img class="lives" id="live4" src="images/live_empty.png" alt="Breakout live full">
+              <img class="lives" id="live5" src="images/live_empty.png" alt="Breakout live full">
             </span>
-            <!--<p><span id="lives">0</span></p>-->
           </div>
-
+          <div class="row">
+            <div class="progress">
+              <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                Power-up active....
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            &nbsp;
+          </div>
           <div class="row text-center">
+            <button id="game-start"> Start </button>
+            <button id="game-stop"> Stop </button>
             <button id="pauze-game" disabled> Pauze </button>
           </div>
-
-          <div class="row debug">
+          <div class="row debug" id="debug">
             <h3>Debug</h2>
             Interval (ms): <span id="fps"></span>
             <br>State: <span id="state"></span>
             <br>Bat - X: <class id="batx"></class>, Y: <class id="baty"></class>
             <br>Ball - X: <class id="ballx"></class>, Y: <class id="bally"></class> 
             <br>Ball X-speed: <class id="ballxs"></class>, Y-speed: <class id="ballys"></class>
+            <br>Total: <class id="total"></class>, Left: <class id="left"></class>
+            <br>Power-up: <class id="pvisible"></class>, Type: <class id="powert"></class> 
+            <br>Active: <class id="pactive"></class> - Cycles: <class id="cycles"></class> 
           </div>
-
         </div>
       </div>
     </div>
-
-<button id="stop">Stop</button>
-<button id="start">Start</button>
-
-
-
+    
   </body>
 </html>
