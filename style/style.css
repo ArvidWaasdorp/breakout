@@ -147,14 +147,6 @@ input[type=checkbox]:checked + label {
   margin-right: 25px;
 }
 
-.progress .bar {
-    -webkit-transition: none;
-    -moz-transition: none;
-    -ms-transition: none;
-    -o-transition: none;
-    transition: none;
-}​
-
 /*
 Make the canvas resonsive
 -------------------------------
