@@ -37,6 +37,9 @@ https://scotch.io/tutorials/default-sizes-for-twitter-bootstraps-media-queries
 ! http://www.softicons.com/toolbar-icons/mono-general-icons-4-by-custom-icon-design/sound-off-icon  (icons for sound)
 ! http://www.color-hex.com/color-palette/389                                                        (one of the palets used)
 
+
+??? Touch support: http://hammerjs.github.io/ ???
+
 Help for collision detection 
 ? https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 

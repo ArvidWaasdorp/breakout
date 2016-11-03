@@ -160,6 +160,7 @@ $( document ).ready(function() {
   var ball         = null;    //Ball object, stores generic variables like; size, speed, radius. Also give access to methodes
   var block        = [];      //Array of block objects,  stores generic variables like; color, x-pos, y-pos and status. Also give access to methodes
   var powerup      = null;    //PowerUp object
+  var touchscreen  = false;
   //********************************************
 
   //********************************************
@@ -231,11 +232,18 @@ $( document ).ready(function() {
 
     $('#debug').hide();                         //Hide the debug-div by default (page load)
 
+    //Check if the user has a touchscreen 
+    // if (!is_touch_device()) {
+    //   touchscreen = false;
+    // } else {
+    //   touchscreen = true;
+    // }
+
     //*******************************************************
     //| New game object and initalize it
     //| It uses the variables in the Defaults-object
     game = new gameSettings();
-    game.init ('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft, 0, Defaults.powerup.time, false);
+    game.init ('play', Defaults.game.level, Defaults.game.score, Defaults.game.lives, Defaults.game.blocks, Defaults.game.blocksLeft, 0, Defaults.powerup.time, false, is_touch_device());
 
     //New bat object and initalize it
     //| It uses the variables in the Defaults-object
@@ -262,8 +270,15 @@ $( document ).ready(function() {
     loadLevel ();
 
     //Add events for the keyboard
-    window.addEventListener ('keyup', function(event) { Key.onKeyup(event); }, false);
+    window.addEventListener ('keyup',   function(event) { Key.onKeyup(event); },   false);
     window.addEventListener ('keydown', function(event) { Key.onKeydown(event); }, false);
+
+
+    window.addEventListener("touchstart",  touchHandler, true);
+    window.addEventListener("touchmove",   touchHandler, true);
+    window.addEventListener("touchend",    touchHandler, true);
+    window.addEventListener("touchcancel", touchHandler, true);
+    enable_scroll();
   }
 
   //********************************************
@@ -434,13 +449,17 @@ $( document ).ready(function() {
       $('#pauze-game').prop ('disabled', true);     //If the gamestate is not running, the button 'pauze-game' must be disabled
     }
 
-//    drawDebugInformation ();                    //Show debug information
+    drawDebugInformation ();                    //Show debug information
   }
   //********************************************
 
   //********************************************
   //| Get the keyboard input and process it
   function getInput() {
+
+    // if (game.touchenabled === true) {
+    //   touchHandler();
+    // }
 
     //Based on the game state it is allowed to move the bat. Even if the game is not running! It must be started 
     if ((game.state === 'play') || (game.state === 'run_ready') || (game.state === 'play_ready')  || game.state === 'run') {
@@ -753,7 +772,7 @@ $( document ).ready(function() {
   //| An object has variables and functions (methods)
   //| 
   //| Object to store all the game variables
-  function gameSettings(state, level, score, lives, blocks, blocksLeft, powerup, powerupTime, powerupActive) {
+  function gameSettings(state, level, score, lives, blocks, blocksLeft, powerup, powerupTime, powerupActive, touchenabled) {
 
     this.state         = state;
     this.level         = level;
@@ -764,6 +783,7 @@ $( document ).ready(function() {
     this.powerup       = powerup;
     this.powerupTime   = powerupTime;
     this.powerupActive = powerupActive;
+    this.touchenabled  = touchenabled; 
 
     gameSettings.prototype.changeBlocks = function(blocks) {
       this.blocks = blocks;
@@ -781,7 +801,7 @@ $( document ).ready(function() {
       this.powerupTime = powerupTime;
     }
 
-    gameSettings.prototype.init = function(state, level, score, lives, blocks, blocksLeft, powerup, powerupTime, powerupActive) {
+    gameSettings.prototype.init = function(state, level, score, lives, blocks, blocksLeft, powerup, powerupTime, powerupActive, touchenabled) {
       this.state         = state;
       this.level         = level;
       this.score         = score;
@@ -789,8 +809,9 @@ $( document ).ready(function() {
       this.blocks        = blocks;
       this.blocksLeft    = blocksLeft; 
       this.powerup       = powerup;
-      this.powerupTime = powerupTime;
+      this.powerupTime   = powerupTime;
       this.powerupActive = powerupActive;
+      this.touchenabled  = touchenabled;
     };
   } 
 
@@ -1018,6 +1039,76 @@ $( document ).ready(function() {
         delete this._pressed[event.keyCode];  //Delete the object when the user releases the key
       }
   };
+
+  //Function to determine if the user has a touch screen
+  function is_touch_device() {
+    return (('ontouchstart' in window)
+      || (navigator.MaxTouchPoints > 0)
+      || (navigator.msMaxTouchPoints > 0));
+  }
+
+  function enable_scroll() {
+    $('body').unbind('touchmove');
+  }
+
+
+function touchHandler(event) {
+  // Get a reference to our coordinates div
+//  var coords = document.getElementById("coords");
+  // Write the coordinates of the touch to the div
+//  alert('x: ' + event.touches[0].pageX + ', y: ' + event.touches[0].pageY);
+
+
+  if (event.touches[0].pageX < canvas.width/2) {
+    bat.moveLeft ();
+  }
+
+  if (event.touches[0].pageX >= canvas.width/2) {
+    bat.moveRight ();
+  }
+
+}
+
+/*
+  function touchHandler(event) {
+      var touches = event.changedTouches,
+          first = touches[0],
+          type = "";
+
+
+
+      switch(event.type)
+      {
+          case "touchstart": type = "mousedown"; break;
+          case "touchmove":  type = "mousemove"; break;        
+          case "touchend":   type = "mouseup";   break;
+          default:           return;
+      }
+
+      // initMouseEvent(type, canBubble, cancelable, view, clickCount, 
+      //                screenX, screenY, clientX, clientY, ctrlKey, 
+      //                altKey, shiftKey, metaKey, button, relatedTarget);
+
+      var simulatedEvent = document.createEvent("MouseEvent");
+      simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                    first.screenX, first.screenY, 
+                                    first.clientX, first.clientY, false, 
+                                    false, false, false, 0, null);
+
+      first.target.dispatchEvent(simulatedEvent);
+      event.preventDefault();
+  }
+  */
+
+//   function TouchMove(event) {
+
+//     var touchobj = event.changedTouches[0] // reference first touch point (ie: first finger)
+//     startx = parseInt(touchobj.clientX) // get x position of touch point relative to left edge of browser
+//     console.log (startx);
+// //        statusdiv.innerHTML = 'Status: touchstart<br> ClientX: ' + startx + 'px'
+// //        event.preventDefault()
+
+//   }
   //********************************************
 
   //Reset the ball and bat with the default values
@@ -1075,6 +1166,7 @@ $( document ).ready(function() {
   function drawDebugInformation() {
     $('#debug').show ();                                                            //Show the div ('Window')
 
+    $('#touch').text    (game.touchenabled);
     $('#fps').text      (Math.round(Defaults.game.interval / Defaults.game.fps));   //Display the cycles in ms. The value is round
     $('#state').text    (game.state);                                               //Display the state in the span
     $('#batx').text     (Math.round(bat.x));
