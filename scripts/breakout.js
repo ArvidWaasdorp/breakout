@@ -449,7 +449,7 @@ $( document ).ready(function() {
       $('#pauze-game').prop ('disabled', true);     //If the gamestate is not running, the button 'pauze-game' must be disabled
     }
 
-    drawDebugInformation ();                    //Show debug information
+    //drawDebugInformation ();                    //Show debug information
   }
   //********************************************
 
